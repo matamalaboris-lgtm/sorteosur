@@ -78,9 +78,9 @@
   .btn-mp:hover{background:#0089C7;transform:translateY(-1px);box-shadow:0 12px 22px -12px rgba(0,158,227,.7), inset 0 1px 0 rgba(255,255,255,.3)}
   .btn-mp .mp-glyph{width:22px;height:22px;border-radius:50%;background:#FFE600;display:grid;place-items:center;flex:none}
   .btn-mp .mp-glyph::before{content:"";width:11px;height:7px;border:2px solid #009EE3;border-top:none;border-radius:0 0 9px 9px}
-  .btn-flow{background:#4E2AD6;color:#fff;box-shadow:0 12px 24px -12px rgba(78,42,214,.85), inset 0 1px 0 rgba(255,255,255,.25)}
-  .btn-flow:hover{background:#3E20B5;transform:translateY(-1px)}
-  .btn-flow .fl-glyph{font-weight:800;font-size:1.1rem;line-height:1}
+  .btn-flow{background:#fff;color:#5f6e18;border:1.5px solid #d4dba8;box-shadow:0 12px 24px -14px rgba(95,110,24,.55), inset 0 1px 0 rgba(255,255,255,.6)}
+  .btn-flow:hover{background:#f7f9ec;border-color:#5f6e18;transform:translateY(-1px)}
+  .btn-flow .fl-logo{height:34px;width:auto;display:block}
   .btn[disabled]{opacity:.5;cursor:not-allowed;transform:none}
 
   /* ===== TOP BAR ===== */
@@ -167,11 +167,27 @@
     font-family:"Sora";font-weight:800;font-size:.72rem;letter-spacing:.04em;padding:6px 12px;border-radius:999px;
     box-shadow:var(--shadow-sm);pointer-events:none}
   @media(max-width:900px){.hero-media{display:none}}
+  .hero-media-img{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;transition:opacity .35s ease}
+  .hero-media-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:24px;font-family:"Sora";font-weight:600;font-size:.82rem;line-height:1.5;color:rgba(255,255,255,.82);
+    background:repeating-linear-gradient(135deg,rgba(255,255,255,.06) 0 14px,rgba(255,255,255,.12) 14px 28px)}
+  .hero-media.has-img .hero-media-ph{display:none}
 
   /* ===== PRIZE SECTION ===== */
   .prize-section{padding:50px 0 8px}
   .prize-wrap{display:flex;justify-content:center}
   .prize-wrap .prize-card{max-width:430px;width:100%}
+  .prize-nav{position:absolute;top:calc(18px + 106px);z-index:4;width:40px;height:40px;border-radius:999px;border:1px solid var(--line);
+    background:rgba(255,255,255,.92);backdrop-filter:blur(4px);color:var(--pine-deep);font-size:1.15rem;cursor:pointer;
+    display:grid;place-items:center;box-shadow:var(--shadow-sm);transition:transform .2s ease, background .2s ease}
+  .prize-nav:hover{transform:scale(1.08);background:#fff}
+  .prize-nav.prev{left:-8px}.prize-nav.next{right:-8px}
+  .prize-card.single .prize-nav{display:none}
+  .cfg-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin:2px 0 8px}
+  .cfg-gallery .g-item{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid var(--line);background-size:cover;background-position:center}
+  .cfg-gallery .g-del{position:absolute;top:4px;right:4px;width:22px;height:22px;border:none;border-radius:99px;
+    background:rgba(20,16,40,.72);color:#fff;font-size:.72rem;cursor:pointer;display:grid;place-items:center;line-height:1}
+  .cfg-gallery:empty{display:none}
 
   /* ===== WHATSAPP FAB ===== */
   .wa-fab{position:fixed;right:20px;bottom:20px;z-index:60;display:none;align-items:center;gap:10px;
@@ -215,7 +231,7 @@
   .prize-body .prize-name{font-size:1.65rem;color:var(--pine-deep);margin:0 0 12px;line-height:1.12;min-height:1.1em}
   #prizePhoto,#prizeName,#prizeRibbon{transition:opacity .35s ease}
   .prize-dots{display:flex;gap:7px;margin:0 0 16px;min-height:7px}
-  .prize-dots i{width:7px;height:7px;border-radius:99px;background:var(--line);transition:width .25s ease, background .25s ease;display:block}
+  .prize-dots i{width:7px;height:7px;border-radius:99px;background:var(--line);transition:width .25s ease, background .25s ease;display:block;cursor:pointer}
   .prize-dots i.active{background:var(--sun);width:20px}
   .cfg-prize{display:grid;grid-template-columns:auto 1.2fr 1fr;gap:8px;margin-bottom:8px;align-items:center}
   .prize-num{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;
@@ -457,9 +473,10 @@
             <div class="hs"><b>24/7</b><span>Compra cuando quieras</span></div>
           </div>
         </div>
-        <div class="hero-media">
-          <span class="hm-badge">🎁 Premios</span>
-          <image-slot id="heroPrize" shape="rect" fit="cover" placeholder="Arrastra aquí una foto de los premios / sorteo"></image-slot>
+        <div class="hero-media" id="heroMedia">
+          <span class="hm-badge">📸 Galería</span>
+          <div class="hero-media-img" id="heroPrize"></div>
+          <span class="hero-media-ph" id="heroPrizePh">Sube fotos de la galería desde el panel de organizadores</span>
         </div>
       </div>
     </div>
@@ -475,6 +492,8 @@
       </div>
       <div class="prize-wrap">
         <div class="prize-card">
+          <button type="button" class="prize-nav prev" id="prizePrev" aria-label="Premio anterior">‹</button>
+          <button type="button" class="prize-nav next" id="prizeNext" aria-label="Premio siguiente">›</button>
           <span class="ribbon" id="prizeRibbon">¡Gran premio!</span>
           <div class="prize-photo" id="prizePhoto"><span class="ph-label">foto del premio</span></div>
           <div class="prize-body">
@@ -566,7 +585,7 @@
               <span class="mp-glyph"></span> Pagar <span id="payAmt">$0</span> con Mercado Pago
             </button>
             <button class="btn btn-flow" id="flowBtn" style="width:100%;justify-content:center;margin-top:10px">
-              <span class="fl-glyph">⚡</span> Pagar <span id="payAmtFlow">$0</span> con Flow
+              Pagar <span id="payAmtFlow">$0</span> con <img class="fl-logo" src="assets/flowlogo.png" alt="Flow" />
             </button>
             <button class="btn btn-pine" id="transferBtn" style="width:100%;justify-content:center;margin-top:10px">
               🏦 Pagar por transferencia
@@ -711,6 +730,10 @@
     <p class="hint" style="margin-top:0">Agrega los premios que quieras. Sube una foto desde tu dispositivo (se optimiza sola). La tarjeta los muestra rotando en orden aleatorio.</p>
     <div id="cfgPrizeList"></div>
     <button type="button" class="btn btn-ghost" id="addPrizeBtn" style="width:100%;justify-content:center;margin:2px 0 6px;padding:11px">➕ Agregar premio</button>
+    <label>Galería del sitio <span style="font-weight:600;color:var(--ink-soft)">— imagen destacada del encabezado</span></label>
+    <p class="hint" style="margin-top:0">Independiente de los premios. Sube una o varias fotos; se muestran rotando en el recuadro grande del encabezado.</p>
+    <div id="cfgGallery" class="cfg-gallery"></div>
+    <label class="btn btn-ghost gallery-add" id="addGalleryBtn" style="width:100%;justify-content:center;margin:2px 0 6px;padding:11px;cursor:pointer"><input type="file" accept="image/*" id="galleryFile" multiple hidden />🖼 Agregar fotos a la galería</label>
     <label>Valor por ticket (CLP)</label>
     <input id="cfgPrice" type="number" min="0" />
     <label>Fecha del sorteo</label>
@@ -892,6 +915,7 @@ const DEFAULT_STATE = {
     prize:"Gran premio SORTEOSUR 🎁",
     prizeImg:"",
     prizes:[{name:"Gran premio SORTEOSUR 🎁", img:""}],
+    gallery:[],
     price:2000,
     date:"Por definir",
     bank:"Banco : BANCO ESTADO | Tipo de cuenta : Cuenta RUT | N° de cuenta: 18204203-K | Nombre: BORIS MATAMALA",
@@ -1012,7 +1036,8 @@ const RANKS = ["1er premio","2º premio","3er premio","4º premio","5º premio"]
 let prizeTimer=null, lastPrizeSig="", prizeFirstPaint=true, drawing=false;
 function renderPrizeDots(n){
   const d = $("#prizeDots");
-  d.innerHTML = n>1 ? Array.from({length:n},()=>"<i></i>").join("") : "";
+  d.innerHTML = n>1 ? Array.from({length:n},(_,i)=>`<i data-i="${i}"></i>`).join("") : "";
+  [...d.children].forEach(el=>el.onclick=()=>goToPrize(+el.dataset.i));
 }
 function setActiveDot(idx){
   const dots = $("#prizeDots").children;
@@ -1034,29 +1059,52 @@ function paintPrize(prizes, idx){
   ph.style.opacity=0; nm.style.opacity=0; rb.style.opacity=0;
   setTimeout(apply, 240);
 }
+let prizeList=[], prizeIdx=0;
+let heroTimer=null, heroSig="", heroIdx=0;
+function startHeroGallery(){
+  const g = (STATE.config.gallery||[]).filter(Boolean);
+  const sig = JSON.stringify(g);
+  if(sig===heroSig && (heroTimer!==null || g.length<2)) return;
+  heroSig = sig;
+  if(heroTimer){ clearInterval(heroTimer); heroTimer=null; }
+  const hero=$("#heroMedia"), img=$("#heroPrize"); if(!hero||!img) return;
+  heroIdx = 0;
+  const paint=k=>{ img.style.backgroundImage=`url("${g[k].replace(/"/g,'&quot;')}")`; };
+  if(!g.length){ hero.classList.remove("has-img"); img.style.backgroundImage="none"; return; }
+  hero.classList.add("has-img"); paint(0);
+  if(g.length<2) return;
+  heroTimer=setInterval(()=>{ heroIdx=(heroIdx+1)%g.length; img.style.opacity=0; setTimeout(()=>{ paint(heroIdx); img.style.opacity=1; },240); }, 4000);
+}
+function goToPrize(idx, resetTimer){
+  if(!prizeList.length) return;
+  prizeIdx = (idx + prizeList.length) % prizeList.length;
+  paintPrize(prizeList, prizeIdx);
+  if(resetTimer!==false && prizeTimer){ clearInterval(prizeTimer); prizeTimer=null; schedulePrizeAuto(); }
+}
+function schedulePrizeAuto(){
+  if(prizeList.length < 2) return;
+  prizeTimer = setInterval(()=>goToPrize(prizeIdx+1, false), 4200);
+}
 function startPrizeCycle(){
   const prizes = getPrizes();
   const sig = JSON.stringify(prizes);
   if(sig===lastPrizeSig && prizeTimer!==null) return; // already cycling this set
   lastPrizeSig = sig;
   if(prizeTimer){ clearInterval(prizeTimer); prizeTimer=null; }
-  prizeFirstPaint = true;
+  prizeList = prizes; prizeIdx = 0; prizeFirstPaint = true;
+  $("#premio .prize-card").classList.toggle("single", prizes.length < 2);
   renderPrizeDots(prizes.length);
-  let order = shuffleIdx(prizes.length);
-  let i = 0;
-  paintPrize(prizes, order[0]);
-  if(prizes.length < 2) return;
-  prizeTimer = setInterval(()=>{
-    i++;
-    if(i >= order.length){ order = shuffleIdx(prizes.length, order[order.length-1]); i=0; }
-    paintPrize(prizes, order[i]);
-  }, 3600);
+  paintPrize(prizes, 0);
+  $("#prizePrev").onclick=()=>goToPrize(prizeIdx-1);
+  $("#prizeNext").onclick=()=>goToPrize(prizeIdx+1);
+  schedulePrizeAuto();
 }
 function renderPublic(){
   const c = STATE.config;
   $("#prizePrice").textContent = fmt(c.price);
   $("#prizeDate").textContent = c.date;
   startPrizeCycle();
+  startHeroGallery();
   const sold = STATE.tickets.length;
   const paid = STATE.tickets.filter(t=>t.status==="paid").length;
   $("#pvNumber").textContent = "????";
@@ -1699,6 +1747,23 @@ function fileToScaledDataUrl(file, maxW=900, quality=0.78){
 }
 function rankName(i){ return RANKS[i] || ((i+1)+"º premio"); }
 let prizeRowSeq = 0;
+let cfgGallery = [];
+function renderCfgGallery(){
+  const wrap=$("#cfgGallery");
+  wrap.innerHTML = cfgGallery.map((src,i)=>`<div class="g-item" style="background-image:url('${src.replace(/'/g,"&#39;")}')"><button type="button" class="g-del" data-i="${i}" title="Quitar">✕</button></div>`).join("");
+  [...wrap.querySelectorAll(".g-del")].forEach(b=>b.onclick=()=>{ cfgGallery.splice(+b.dataset.i,1); renderCfgGallery(); });
+}
+async function onGalleryFiles(input){
+  const files=[...(input.files||[])]; if(!files.length) return;
+  const btn=$("#addGalleryBtn"); const prev=btn.textContent; btn.style.pointerEvents="none";
+  for(const f of files){
+    btn.textContent="Procesando…";
+    try{ cfgGallery.push(await fileToScaledDataUrl(f, 1200, 0.8)); }catch(e){}
+  }
+  btn.innerHTML='<input type="file" accept="image/*" id="galleryFile" multiple hidden />🖼 Agregar fotos a la galería';
+  $("#galleryFile").addEventListener("change", e=>onGalleryFiles(e.target));
+  btn.style.pointerEvents=""; input.value=""; renderCfgGallery();
+}
 function renumberPrizeRows(){
   const rows = [...document.querySelectorAll("#cfgPrizeList .cfg-prize")];
   rows.forEach((row,idx)=>{
@@ -1754,6 +1819,8 @@ async function onPrizeFile(i, input){
 function openCfg(){
   const c=STATE.config;
   renderPrizeRows(getPrizes());
+  cfgGallery = (c.gallery||[]).filter(Boolean).slice();
+  renderCfgGallery();
   $("#cfgPrice").value=c.price;
   $("#cfgDate").value=c.date; $("#cfgBank").value=c.bank; $("#cfgMpLink").value=c.mpLink||""; $("#cfgFlowLink").value=c.flowLink||""; $("#cfgFlowApi").checked=!!c.flowApi; $("#cfgWhats").value=c.whatsapp||""; $("#cfgInstagram").value=c.instagram||""; $("#cfgTiktok").value=c.tiktok||"";
   $("#cfgOverlay").classList.add("show");
@@ -1771,6 +1838,7 @@ async function saveCfg(){
     STATE.config.prize=prizes[0].name;       // back-compat
     STATE.config.prizeImg=prizes[0].img||"";
   }
+  STATE.config.gallery=cfgGallery.slice();
   STATE.config.price=Math.max(0,parseInt($("#cfgPrice").value)||STATE.config.price);
   STATE.config.date=$("#cfgDate").value.trim()||STATE.config.date;
   STATE.config.bank=$("#cfgBank").value.trim();
@@ -1836,6 +1904,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   $("#closeCfg").onclick=()=>$("#cfgOverlay").classList.remove("show");
   $("#saveCfg").onclick=saveCfg;
   $("#addPrizeBtn").onclick=()=>addPrizeRow("","");
+  $("#galleryFile").addEventListener("change", e=>onGalleryFiles(e.target));
 
   document.querySelectorAll(".overlay").forEach(o=>o.addEventListener("click",e=>{ if(e.target===o) o.classList.remove("show"); }));
 
