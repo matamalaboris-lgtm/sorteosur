@@ -1,0 +1,1813 @@
+<!-- SORTEOSUR · Plataforma de sorteos -->
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SORTEOSUR · Sorteos online</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+  :root{
+    --cream:#F4F5FB;
+    --cream-2:#E9EAF6;
+    --ink:#15162B;
+    --ink-soft:#5A5E78;
+    --sun:#F59E0B;
+    --sun-deep:#D97706;
+    --pine:#4F46E5;
+    --pine-deep:#3730A3;
+    --sky:#6366F1;
+    --coral:#EF4444;
+    --gold:#FBBF24;
+    --paper:#FFFFFF;
+    --line:#E4E4F2;
+    --line-soft:#EDEDF7;
+    --shadow:0 20px 44px -26px rgba(30,27,75,.34);
+    --shadow-md:0 14px 30px -20px rgba(30,27,75,.28);
+    --shadow-sm:0 6px 16px -12px rgba(30,27,75,.26);
+    --r:16px;
+    --r-lg:20px;
+    --yellow:#FACC15;
+    --blue:#4F46E5;
+    --green:#10B981;
+    --sky-light:#C7D2FE;
+    --wa:#25D366;
+    --grad-brand:linear-gradient(115deg,#4F46E5 0%,#6D28D9 42%,#0EA5E9 100%);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family:"Manrope",system-ui,sans-serif;
+    color:var(--ink);
+    background:var(--cream);
+    line-height:1.6;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* soft, intentional ambient glow — replaces muddy double-gradient */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(820px 460px at 92% -12%, rgba(79,70,229,.13), transparent 60%),
+      radial-gradient(680px 480px at -8% 2%, rgba(14,165,233,.10), transparent 58%),
+      radial-gradient(560px 420px at 50% 108%, rgba(109,40,217,.08), transparent 60%);
+  }
+  h1,h2,h3,.display{font-family:"Sora",sans-serif;font-weight:700;letter-spacing:-.02em;line-height:1.05}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  a{color:inherit}
+
+  .btn{
+    font-family:"Sora",sans-serif;font-weight:600;font-size:.98rem;letter-spacing:-.01em;
+    border:none;border-radius:12px;padding:14px 24px;cursor:pointer;
+    transition:transform .14s ease, box-shadow .2s ease, background .2s, border-color .2s;
+    display:inline-flex;align-items:center;gap:9px;text-decoration:none;white-space:nowrap;
+  }
+  .btn:active{transform:translateY(1px) scale(.99)}
+  .btn-sun{background:var(--sun);color:#fff;box-shadow:0 8px 18px -10px rgba(185,122,34,.6)}
+  .btn-sun:hover{background:var(--sun-deep);transform:translateY(-1px);box-shadow:0 12px 22px -10px rgba(185,122,34,.7)}
+  .btn-pine{background:var(--pine);color:#fff;box-shadow:0 8px 18px -10px rgba(20,54,85,.55)}
+  .btn-pine:hover{background:var(--pine-deep);transform:translateY(-1px)}
+  .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow-sm)}
+  .btn-ghost:hover{border-color:var(--pine);background:#fff}
+  .btn-mp{background:#009EE3;color:#fff;box-shadow:0 12px 24px -12px rgba(0,158,227,.85), inset 0 1px 0 rgba(255,255,255,.3)}
+  .btn-mp:hover{background:#0089C7;transform:translateY(-1px);box-shadow:0 12px 22px -12px rgba(0,158,227,.7), inset 0 1px 0 rgba(255,255,255,.3)}
+  .btn-mp .mp-glyph{width:22px;height:22px;border-radius:50%;background:#FFE600;display:grid;place-items:center;flex:none}
+  .btn-mp .mp-glyph::before{content:"";width:11px;height:7px;border:2px solid #009EE3;border-top:none;border-radius:0 0 9px 9px}
+  .btn-flow{background:#4E2AD6;color:#fff;box-shadow:0 12px 24px -12px rgba(78,42,214,.85), inset 0 1px 0 rgba(255,255,255,.25)}
+  .btn-flow:hover{background:#3E20B5;transform:translateY(-1px)}
+  .btn-flow .fl-glyph{font-weight:800;font-size:1.1rem;line-height:1}
+  .btn[disabled]{opacity:.5;cursor:not-allowed;transform:none}
+
+  /* ===== TOP BAR ===== */
+  .topbar{position:sticky;top:0;z-index:40;backdrop-filter:blur(12px) saturate(1.2);
+    background:rgba(244,245,251,.82);border-bottom:1px solid var(--line)}
+  .topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:70px}
+  .brand{display:flex;align-items:center;gap:13px;font-family:"Sora";font-weight:600;font-size:1.06rem}
+  .brand-logo{height:38px;width:auto;flex:none;display:block}
+  .logo-chip{flex:none;display:grid;place-items:center;background:#fff;border-radius:12px;padding:8px 12px;
+    box-shadow:0 8px 18px -10px rgba(0,0,0,.4)}
+  .logo-chip img{height:30px;width:auto;display:block}
+  .brand .b-lines{display:flex;flex-direction:column;line-height:1.1}
+  .brand small{font-family:"Manrope";font-weight:800;color:var(--pine);font-size:.7rem;letter-spacing:.09em;text-transform:uppercase}
+  .nav-links{display:flex;gap:4px;align-items:center}
+  .nav-links a{color:var(--ink-soft);text-decoration:none;font-weight:800;padding:9px 14px;border-radius:11px;font-size:.94rem;transition:.15s}
+  .nav-links a:hover{color:var(--pine-deep);background:rgba(79,70,229,.09)}
+  .nav-links a.admin-link{color:var(--ink-soft);font-weight:700}
+
+  /* ===== WORDMARK ===== */
+  .wordmark{display:inline-flex;align-items:center;gap:11px;text-decoration:none;font-family:"Sora",sans-serif}
+  .wordmark .wm-mark{flex:none;width:40px;height:40px;border-radius:12px;background:var(--grad-brand);
+    display:grid;place-items:center;box-shadow:0 10px 22px -10px rgba(79,70,229,.75);position:relative;overflow:hidden}
+  .wordmark .wm-mark::after{content:"";position:absolute;inset:0;background:
+    repeating-linear-gradient(120deg,rgba(255,255,255,.14) 0 2px,transparent 2px 9px);mix-blend-mode:overlay}
+  .wordmark .wm-mark b{color:#fff;font-weight:800;font-size:1.28rem;line-height:1;transform:translateY(-1px)}
+  .wordmark .wm-name{font-weight:800;font-size:1.16rem;letter-spacing:-.02em;color:var(--ink);line-height:1}
+  .wordmark .wm-name i{font-style:normal;background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .wordmark .wm-sub{display:block;font-family:"Manrope";font-weight:800;font-size:.62rem;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--ink-soft);margin-top:3px}
+  .topbar .wordmark .wm-name{font-size:1.24rem}
+
+  /* ===== HERO (dynamic gradient) ===== */
+  .hero{position:relative;padding:34px 0 14px}
+  .hero-stage{position:relative;border-radius:28px;overflow:hidden;box-shadow:var(--shadow);
+    min-height:clamp(400px,48vw,540px);display:flex;align-items:center;isolation:isolate;
+    background:#1e1b4b}
+  .hero-art{position:absolute;inset:-40% -10%;z-index:-3;
+    background:
+      radial-gradient(40% 55% at 18% 22%, rgba(99,102,241,.95), transparent 60%),
+      radial-gradient(45% 55% at 82% 18%, rgba(14,165,233,.9), transparent 62%),
+      radial-gradient(50% 60% at 70% 88%, rgba(139,92,246,.95), transparent 62%),
+      radial-gradient(40% 50% at 25% 92%, rgba(236,72,153,.55), transparent 60%),
+      linear-gradient(120deg,#312e81,#1e1b4b);
+    filter:saturate(1.15);animation:heroDrift 20s ease-in-out infinite alternate}
+  @keyframes heroDrift{0%{transform:translate3d(0,0,0) scale(1.02)}100%{transform:translate3d(-3%,2%,0) scale(1.08)}}
+  .hero-stage::before{content:"";position:absolute;inset:0;z-index:-2;pointer-events:none;
+    background:repeating-linear-gradient(125deg,rgba(255,255,255,.05) 0 1px,transparent 1px 22px)}
+  .hero-scrim{position:absolute;inset:0;z-index:-1;
+    background:linear-gradient(90deg, rgba(12,10,40,.62) 0%, rgba(12,10,40,.28) 46%, rgba(12,10,40,0) 74%)}
+  .hero-content{position:relative;padding:clamp(28px,4.4vw,58px);max-width:640px}
+  .eyebrow{display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.24);backdrop-filter:blur(6px);
+    padding:8px 16px;border-radius:999px;font-weight:800;font-size:.76rem;color:#fff;
+    text-transform:uppercase;letter-spacing:.12em;box-shadow:var(--shadow-sm)}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:#5EEAD4;box-shadow:0 0 0 4px rgba(94,234,212,.28)}
+  .hero h1{font-size:clamp(2.4rem,5.3vw,4rem);margin:18px 0 16px;font-weight:800;color:#fff;
+    text-shadow:0 2px 30px rgba(10,8,40,.5);letter-spacing:-.025em}
+  .hero h1 .hl{position:relative;white-space:nowrap;
+    background:linear-gradient(90deg,#FBBF24,#FDE68A);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero h1 .hl svg{position:absolute;left:-2%;right:-2%;bottom:-.18em;width:104%;height:.42em;z-index:-1}
+  .hero p.lead{font-size:clamp(1.05rem,1.55vw,1.26rem);color:rgba(255,255,255,.92);max-width:44ch;margin:0 0 28px;font-weight:600;line-height:1.55;text-shadow:0 1px 12px rgba(10,8,40,.4)}
+  .hero-cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .hero-cta .mini-note{font-weight:800;font-size:.86rem;color:var(--ink-soft)}
+  .btn-brand{background:var(--grad-brand);color:#fff;background-size:160% 160%;
+    box-shadow:0 14px 30px -12px rgba(79,70,229,.85);animation:brandShift 6s ease infinite}
+  .btn-brand:hover{transform:translateY(-1px);box-shadow:0 18px 34px -12px rgba(79,70,229,.9)}
+  @keyframes brandShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+  .btn-glass{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(6px)}
+  .btn-glass:hover{background:rgba(255,255,255,.22);transform:translateY(-1px)}
+
+  /* stat strip under hero headline */
+  .hero-stats{display:flex;gap:26px;margin-top:30px;flex-wrap:wrap}
+  .hero-stats .hs{color:#fff}
+  .hero-stats .hs b{display:block;font-family:"Sora";font-weight:800;font-size:1.7rem;line-height:1;
+    background:linear-gradient(90deg,#fff,#C7D2FE);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero-stats .hs span{font-family:"Manrope";font-weight:800;font-size:.72rem;letter-spacing:.06em;
+    text-transform:uppercase;color:rgba(255,255,255,.72)}
+
+  /* ===== PRIZE SECTION ===== */
+  .prize-section{padding:50px 0 8px}
+  .prize-wrap{display:flex;justify-content:center}
+  .prize-wrap .prize-card{max-width:430px;width:100%}
+
+  /* ===== WHATSAPP FAB ===== */
+  .wa-fab{position:fixed;right:20px;bottom:20px;z-index:60;display:none;align-items:center;gap:10px;
+    background:var(--wa);color:#fff;text-decoration:none;font-family:"Sora";font-weight:600;font-size:.95rem;
+    padding:13px 18px 13px 14px;border-radius:999px;box-shadow:0 14px 30px -10px rgba(37,211,102,.7)}
+  .wa-fab.show{display:inline-flex}
+  .wa-fab:hover{transform:translateY(-2px);box-shadow:0 18px 34px -10px rgba(37,211,102,.8)}
+  .wa-fab svg{width:26px;height:26px;flex:none}
+  .wa-fab .wa-label{white-space:nowrap}
+  @media(max-width:560px){ .wa-fab .wa-label{display:none} .wa-fab{padding:14px;border-radius:50%} }
+
+  @media(max-width:760px){
+    .hero-stage{align-items:flex-end}
+    .hero-scrim{background:linear-gradient(0deg, rgba(12,10,40,.86) 0%, rgba(12,10,40,.4) 52%, rgba(12,10,40,.1) 100%)}
+    .hero-content{max-width:none}
+    .hero-stats{gap:18px}
+  }
+
+  /* prize card in hero */
+  .hero-visual{position:relative}
+  .hero-visual::before{content:"";position:absolute;width:120%;height:120%;left:-10%;top:-10%;z-index:0;
+    background:radial-gradient(closest-side, rgba(31,78,121,.12), transparent 72%)}
+  .prize-card{position:relative;z-index:1;background:var(--paper);border-radius:var(--r-lg);padding:18px 18px 24px;
+    box-shadow:var(--shadow);border:1px solid var(--line);transition:transform .3s ease}
+  .prize-card:hover{transform:translateY(-3px)}
+  .prize-card .ribbon{position:absolute;top:-15px;right:24px;z-index:3;white-space:nowrap;
+    background:var(--pine);color:#fff;
+    font-family:"Sora";font-weight:600;padding:8px 18px;border-radius:999px;font-size:.82rem;letter-spacing:-.01em;
+    box-shadow:0 8px 16px -8px rgba(20,54,85,.6)}
+  .prize-photo{position:relative;height:212px;border-radius:18px;overflow:hidden;background-size:cover;background-position:center;
+    border:1px solid var(--line)}
+  .prize-photo:not(.has-img){
+    background:
+      repeating-linear-gradient(135deg, #ECEAE3 0 13px, #F4F2EC 13px 26px);
+    display:grid;place-items:center}
+  .prize-photo .ph-label{font-family:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;
+    font-size:.74rem;letter-spacing:.04em;color:#8B9196;background:rgba(255,255,255,.8);
+    padding:6px 12px;border-radius:8px;border:1px dashed #C7CCD2}
+  .prize-body{padding:18px 8px 0}
+  .prize-body h3{font-size:.76rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-soft);margin:0 0 5px;font-family:"Manrope";font-weight:800}
+  .prize-body .prize-name{font-size:1.65rem;color:var(--pine-deep);margin:0 0 12px;line-height:1.12;min-height:1.1em}
+  #prizePhoto,#prizeName,#prizeRibbon{transition:opacity .35s ease}
+  .prize-dots{display:flex;gap:7px;margin:0 0 16px;min-height:7px}
+  .prize-dots i{width:7px;height:7px;border-radius:99px;background:var(--line);transition:width .25s ease, background .25s ease;display:block}
+  .prize-dots i.active{background:var(--sun);width:20px}
+  .cfg-prize{display:grid;grid-template-columns:auto 1.2fr 1fr;gap:8px;margin-bottom:8px;align-items:center}
+  .prize-num{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;
+    font-family:"Sora";font-weight:700;font-size:.82rem;color:#fff;background:var(--pine)}
+  .prize-row-del{flex:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;
+    color:var(--coral);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:border-color .15s}
+  .prize-row-del:hover{border-color:var(--coral)}
+  .cfg-photo{display:flex;align-items:center;gap:6px}
+  .photo-btn{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;
+    border:1.5px dashed var(--line);border-radius:12px;background:var(--cream);color:var(--ink-soft);
+    font-weight:700;font-size:.86rem;padding:11px 10px;text-align:center;background-size:cover;background-position:center;
+    min-height:46px;transition:border-color .15s, color .15s;overflow:hidden}
+  .photo-btn:hover{border-color:var(--pine);color:var(--pine)}
+  .photo-btn.has-img{border-style:solid;border-color:var(--pine);color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+  .photo-btn.has-img .pb-txt{background:rgba(20,54,85,.55);padding:3px 8px;border-radius:7px;font-size:.78rem}
+  .photo-clear{flex:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;
+    color:var(--coral);cursor:pointer;font-size:.9rem;display:none;align-items:center;justify-content:center}
+  .photo-clear.show{display:flex}
+  .photo-clear:hover{border-color:var(--coral)}
+  .prize-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .prize-meta div{background:var(--cream);border-radius:14px;padding:12px 14px;border:1px solid var(--line-soft)}
+  .prize-meta span{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:800;margin-bottom:2px}
+  .prize-meta strong{font-family:"Sora";font-size:1.22rem;color:var(--ink);font-weight:600}
+
+  /* ===== SECTIONS ===== */
+  section.block{padding:58px 0}
+  .sec-head{text-align:center;max-width:620px;margin:0 auto 42px}
+  .sec-head .kicker{display:inline-block;font-weight:800;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--sun-deep);margin-bottom:10px}
+  .sec-head h2{font-size:clamp(1.9rem,4vw,2.7rem);margin:0 0 10px}
+  .sec-head p{color:var(--ink-soft);font-weight:600;margin:0;font-size:1.08rem}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;position:relative}
+  .step{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:28px 26px;box-shadow:var(--shadow-sm);
+    position:relative;transition:transform .2s ease, box-shadow .2s ease}
+  .step:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+  .step .num{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-family:"Sora";
+    font-weight:700;font-size:1.3rem;color:#fff;background:var(--pine);margin-bottom:16px;
+    box-shadow:0 8px 16px -10px rgba(20,54,85,.5)}
+  .step:nth-child(2) .num{background:var(--sun);box-shadow:0 8px 16px -10px rgba(185,122,34,.5)}
+  .step:nth-child(3) .num{background:var(--sky);box-shadow:0 8px 16px -10px rgba(92,127,163,.5)}
+  .step h3{margin:0 0 8px;font-size:1.28rem}
+  .step p{margin:0;color:var(--ink-soft);font-weight:600;font-size:.98rem}
+
+  /* ===== BUY ===== */
+  .buy-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:30px;box-shadow:var(--shadow-md)}
+  .card h3{margin:0 0 20px;font-size:1.55rem}
+  label{display:block;font-weight:800;font-size:.84rem;margin:16px 0 7px;color:var(--ink)}
+  label:first-of-type{margin-top:0}
+  input,select{width:100%;font-family:"Manrope";font-size:1rem;font-weight:600;padding:13px 15px;
+    border:1.5px solid var(--line);border-radius:14px;background:var(--cream);color:var(--ink);transition:border .15s, box-shadow .15s}
+  input::placeholder{color:#B7AC97}
+  input:focus,select:focus{outline:none;border-color:var(--pine);background:#fff;box-shadow:0 0 0 4px rgba(31,78,121,.12)}
+  .qty-row{display:flex;align-items:center;gap:12px}
+  .qty-btn{width:48px;height:48px;flex:none;font-size:1.45rem;border-radius:14px;border:1.5px solid var(--line);
+    background:var(--cream);cursor:pointer;font-family:"Sora";color:var(--pine);line-height:1;transition:.15s;display:grid;place-items:center}
+  .qty-btn:hover{border-color:var(--pine);color:var(--pine);background:#fff}
+  .total-line{display:flex;justify-content:space-between;align-items:baseline;margin:22px 0 6px;
+    padding-top:18px;border-top:1.5px dashed var(--line)}
+  .total-line .t-lab{font-weight:800;color:var(--ink-soft)}
+  .total-line .t-val{font-family:"Sora";font-size:2rem;color:var(--pine-deep);font-weight:600}
+  .hint{font-size:.85rem;color:var(--ink-soft);font-weight:600;margin-top:7px}
+
+  /* live ticket preview — colorful & festive */
+  .ticket-stack{position:sticky;top:92px}
+  .ticket{position:relative;background:#fff;border:1px solid var(--line);
+    border-radius:22px;padding:0;box-shadow:var(--shadow)}
+  .ticket .t-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+    padding:18px 22px 16px;border:none;border-radius:21px 21px 0 0;
+    background:linear-gradient(110deg,#1F8A6B 0%,#2A6FB0 48%,#E8923A 100%)}
+  .ticket .t-org{font-family:"Sora";font-weight:700;color:#fff;font-size:1.06rem;line-height:1.15}
+  .ticket .t-org small{display:block;color:rgba(255,255,255,.85);font-family:"Manrope";font-weight:800;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
+  .ticket .t-tag{flex:none;white-space:nowrap;background:#fff;color:var(--pine-deep);font-family:"Sora";font-weight:700;padding:5px 13px;border-radius:999px;font-size:.72rem;letter-spacing:.02em;box-shadow:0 4px 10px -4px rgba(0,0,0,.35)}
+  .ticket .t-number{text-align:center;position:relative;margin:0 22px;padding:30px 0 16px;border-top:2px dashed var(--line);
+    background:
+      radial-gradient(circle at 13% 32%, rgba(232,146,58,.18) 0 6px, transparent 7px),
+      radial-gradient(circle at 86% 26%, rgba(42,111,176,.18) 0 5px, transparent 6px),
+      radial-gradient(circle at 82% 76%, rgba(31,138,107,.16) 0 5px, transparent 6px),
+      radial-gradient(circle at 16% 78%, rgba(194,74,60,.16) 0 5px, transparent 6px)}
+  .ticket .t-number::before,.ticket .t-number::after{content:"";position:absolute;top:-15px;width:28px;height:28px;border-radius:50%;
+    background:var(--cream);box-shadow:inset 0 0 0 1px var(--line)}
+  .ticket .t-number::before{left:-36px}
+  .ticket .t-number::after{right:-36px}
+  .ticket .t-number span{font-size:.72rem;text-transform:uppercase;letter-spacing:.16em;color:var(--pine);font-weight:800}
+  .ticket .t-number b{display:block;font-family:"Sora";font-size:3.8rem;letter-spacing:.04em;font-weight:800;line-height:1.05;
+    background:linear-gradient(118deg,var(--pine) 0%,#2A6FB0 42%,var(--sun-deep) 78%,var(--coral) 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+  .ticket .t-foot{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:0 22px;padding:6px 0 22px}
+  .ticket .t-holder{font-weight:800}
+  .ticket .t-holder small{display:block;color:var(--ink-soft);font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+  .ticket canvas{border-radius:10px;display:block;background:#fff;padding:5px;border:1px solid var(--line)}
+  .ticket .t-code{font-family:"Sora";letter-spacing:.18em;color:var(--sun-deep);font-size:1.1rem;font-weight:700}
+  .ticket > p{padding-left:22px;padding-right:22px}
+  .ticket > p:last-child{padding-bottom:20px}
+  .ticket .t-date{display:flex;justify-content:center;margin:-4px 22px 0;padding-bottom:18px}
+  .ticket .t-date b{display:inline-flex;align-items:center;gap:7px;background:var(--cream-2);color:var(--pine-deep);
+    font-family:"Manrope";font-weight:800;font-size:.8rem;padding:7px 15px;border-radius:999px;letter-spacing:.01em}
+  .status-pill{display:inline-block;padding:4px 11px;border-radius:999px;font-weight:800;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em}
+  .st-pending{background:#FFF;color:#9A6B16;box-shadow:0 4px 10px -4px rgba(0,0,0,.35)}
+  .st-paid{background:#FFF;color:var(--pine-deep);box-shadow:0 4px 10px -4px rgba(0,0,0,.35)}
+
+  .pay-box{background:#F7F5EF;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-top:20px}
+  .pay-box h4{margin:0 0 10px;font-family:"Sora";color:var(--sun-deep);font-size:1.08rem;font-weight:600;display:flex;align-items:center;gap:8px}
+  .pay-box dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:.93rem}
+  .pay-box dt{font-weight:800;color:var(--sun-deep)}
+  .pay-box dd{margin:0;font-weight:700;color:var(--ink)}
+  .pay-mp-note{display:flex;align-items:center;gap:10px;background:#E8F6FD;border:1px solid #B6E2F6;color:#0A5C82;
+    border-radius:12px;padding:10px 13px;font-weight:800;font-size:.86rem;margin-bottom:12px}
+  .pay-mp-note .mp-dot{width:24px;height:24px;border-radius:50%;background:#009EE3;flex:none;display:grid;place-items:center}
+  .pay-mp-note .mp-dot::before{content:"";width:11px;height:7px;border:2px solid #FFE600;border-top:none;border-radius:0 0 9px 9px}
+  .pay-or{text-align:center;font-weight:800;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin:6px 0 10px}
+  .confirm-note{background:#E8F6FD;border:1px solid #B6E2F6;color:#0A5C82;border-radius:14px;padding:13px 16px;font-weight:700;font-size:.92rem;line-height:1.5}
+  .confirm-note--bank{background:#FBF6EC;border-color:#EAD9B6;color:#7A571B}
+  .confirm-note .bank-list{margin:8px 0 6px;padding-left:18px}
+  .confirm-note .bank-list li{margin:2px 0;font-weight:800}
+
+  /* payment panel inside the generated-ticket modal */
+  .pay-panel{background:var(--cream);border:1px solid var(--line);border-radius:18px;padding:20px;margin-top:4px}
+  .pay-panel .pp-total{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+  .pay-panel .pp-total span{font-weight:800;color:var(--ink-soft)}
+  .pay-panel .pp-total b{font-family:"Sora";font-weight:600;font-size:1.7rem;color:var(--pine-deep)}
+  .pay-panel .pp-transfer{margin-top:14px;font-size:.9rem}
+  .pay-panel .pp-transfer .pp-lab{font-weight:800;color:var(--ink-soft);margin-bottom:5px;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+  .pay-panel .pp-transfer ul{margin:0;padding-left:18px}
+  .pay-panel .pp-transfer li{font-weight:700;margin:2px 0}
+
+  .luck-note{text-align:center;margin-top:16px;font-weight:800;color:var(--pine);background:rgba(31,78,121,.06);
+    border-radius:12px;padding:12px 16px;font-size:.92rem}
+
+  /* lookup */
+  .lookup-row{display:flex;gap:10px;flex-wrap:wrap}
+  .lookup-row input{flex:1;min-width:200px}
+
+  /* ===== MODAL ===== */
+  .overlay{position:fixed;inset:0;background:rgba(42,38,32,.55);backdrop-filter:blur(5px);
+    display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
+  .overlay.show{display:flex}
+  .modal{background:var(--paper);border-radius:20px;max-width:470px;width:100%;padding:32px;box-shadow:var(--shadow);
+    max-height:92vh;overflow:auto;position:relative;animation:pop .32s cubic-bezier(.34,1.4,.5,1)}
+  @keyframes pop{from{transform:scale(.92);opacity:0}}
+  .modal .x{position:absolute;top:18px;right:18px;width:38px;height:38px;border-radius:50%;border:none;
+    background:var(--cream);font-size:1.1rem;cursor:pointer;color:var(--ink-soft);transition:.15s;z-index:5}
+  .modal .x:hover{background:var(--cream-2);color:var(--ink)}
+  .modal h3{margin:0 0 5px;font-size:1.7rem;text-align:center}
+  .modal .sub{text-align:center;color:var(--ink-soft);font-weight:700;margin:0 0 22px}
+
+  /* ===== ADMIN ===== */
+  .admin{display:none}
+  .admin.show{display:block}
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}
+  .stat{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:20px;text-align:center;box-shadow:var(--shadow-sm)}
+  .stat b{display:block;font-family:"Sora";font-size:2.1rem;color:var(--pine-deep);font-weight:600}
+  .stat span{font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:800}
+  table{width:100%;border-collapse:collapse;background:var(--paper);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)}
+  th,td{padding:12px 13px;text-align:left;font-size:.9rem;border-bottom:1px solid var(--line)}
+  th{background:var(--cream-2);font-family:"Sora";font-weight:500;color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  td .mini{padding:6px 13px;font-size:.82rem;border-radius:999px}
+  .draw-banner{position:relative;overflow:hidden;background:linear-gradient(150deg,var(--pine),var(--pine-deep));color:#fff;border-radius:var(--r);
+    padding:34px;text-align:center;margin-bottom:26px;box-shadow:var(--shadow-md)}
+  .draw-banner::after{content:"";position:absolute;width:340px;height:340px;right:-90px;top:-150px;border-radius:50%;
+    background:radial-gradient(closest-side, rgba(255,210,122,.22), transparent 70%)}
+  .draw-banner h3{color:#fff;font-size:1.6rem;margin:0 0 6px}
+  .draw-banner .winner-num{font-family:"Sora";font-size:3.6rem;color:var(--gold);margin:8px 0;font-weight:600;letter-spacing:.04em}
+  .winner-row{position:relative;padding:14px 0;border-top:1px solid rgba(255,255,255,.16)}
+  .winner-row:first-child{border-top:none}
+  .winner-row .winner-num{font-size:2.6rem;margin:4px 0}
+  .winner-rank{display:inline-block;background:rgba(255,255,255,.16);color:#fff;font-family:"Sora";font-weight:600;font-size:.76rem;padding:4px 13px;border-radius:999px;letter-spacing:.03em}
+  .winner-prize{margin:3px 0 0;font-weight:800;color:var(--gold)}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+  .toolbar input{width:auto;flex:1;min-width:180px}
+
+  footer{position:relative;background:var(--pine-deep);color:#EAD9BE;padding:42px 0;margin-top:48px;overflow:hidden}
+  footer::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;
+    background:linear-gradient(90deg,var(--pine),var(--sun))}
+  footer .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:center}
+  footer a{color:var(--gold);cursor:pointer;font-weight:800;text-decoration:none}
+  footer a:hover{text-decoration:underline}
+
+  .notice{background:#FFE9C7;border:1px solid var(--sun);color:#8a5b12;padding:12px 16px;border-radius:14px;
+    font-weight:700;font-size:.86rem;margin:0 auto 18px;max-width:780px;text-align:center}
+  .notice--sync{background:#E2EEF7;border-color:var(--pine);color:var(--pine-deep)}
+
+  @media(max-width:880px){
+    .hero{padding:48px 0 24px}
+    .hero-grid,.buy-grid{grid-template-columns:1fr}
+    .hero-visual{max-width:440px;margin:8px auto 0}
+    .steps{grid-template-columns:1fr}
+    .stat-grid{grid-template-columns:1fr 1fr}
+    .ticket-stack{position:static}
+    .nav-links a:not(.admin-link){display:none}
+    .trust{max-width:none}
+    table{font-size:.82rem}
+    th,td{padding:9px}
+  }
+  @media print{
+    body *{visibility:hidden}
+    #printArea,#printArea *{visibility:visible}
+    #printArea{position:absolute;left:0;top:0;width:100%}
+    .modal .x,.modal .btn{display:none}
+  }
+</style>
+
+<!-- ===================== TOP BAR ===================== -->
+<div class="topbar" id="top">
+  <div class="wrap">
+    <a class="brand wordmark" href="#top">
+      <span class="wm-mark"><b>S</b></span>
+      <span><span class="wm-name">SORTEO<i>SUR</i></span><span class="wm-sub">Sorteos online</span></span>
+    </a>
+    <nav class="nav-links">
+      <a href="#como">Cómo funciona</a>
+      <a href="#comprar">Comprar número</a>
+      <a href="#buscar">Mi número</a>
+      <a class="admin-link" id="adminToggle">🔒 Organizadores</a>
+    </nav>
+  </div>
+</div>
+
+<!-- ===================== PUBLIC SITE ===================== -->
+<div id="publicSite">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="wrap">
+      <div class="hero-stage">
+        <div class="hero-art" id="heroArt"></div>
+        <div class="hero-scrim"></div>
+        <div class="hero-content">
+          <span class="eyebrow"><span class="dot"></span> Sorteos online transparentes</span>
+          <h1>Tu número, tu <span class="hl">oportunidad</span> de ganar</h1>
+          <p class="lead">Compra tu número en segundos, recíbelo al instante con código y QR, y participa por grandes premios. Simple, seguro y 100% online.</p>
+          <div class="hero-cta">
+            <a href="#comprar" class="btn btn-brand">Comprar mi número →</a>
+            <a href="#como" class="btn btn-glass">¿Cómo funciona?</a>
+          </div>
+          <div class="hero-stats">
+            <div class="hs"><b>100%</b><span>Online</span></div>
+            <div class="hs"><b>QR</b><span>Ticket verificable</span></div>
+            <div class="hs"><b>24/7</b><span>Compra cuando quieras</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- PREMIO -->
+  <section class="prize-section" id="premio">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker">El gran premio</span>
+        <h2>¿Qué puedes ganar? 🎁</h2>
+        <p>Compra tu número y participa por estos premios.</p>
+      </div>
+      <div class="prize-wrap">
+        <div class="prize-card">
+          <span class="ribbon" id="prizeRibbon">¡Gran premio!</span>
+          <div class="prize-photo" id="prizePhoto"><span class="ph-label">foto del premio</span></div>
+          <div class="prize-body">
+            <h3 id="prizeKicker">El ganador se lleva</h3>
+            <p class="prize-name" id="prizeName">—</p>
+            <div class="prize-dots" id="prizeDots"></div>
+            <div class="prize-meta">
+              <div><span>Valor ticket</span><strong id="prizePrice">—</strong></div>
+              <div><span>Sorteo</span><strong id="prizeDate">—</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="block" id="como">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker">Participar es muy fácil</span>
+        <h2>Tu número en tres pasos</h2>
+        <p>Completa, paga y recibe tu ticket digital para el sorteo final.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <h3>Completa tus datos</h3>
+          <p>Indica tu nombre, contacto y cuántos tickets quieres comprar.</p>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <h3>Realiza el pago</h3>
+          <p>Paga de forma rápida y segura con Flow. Tu ticket queda registrado al instante.</p>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <h3>Recibe tu número único</h3>
+          <p>Te entregamos un ticket digital con un número y código únicos que participa en el sorteo final.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUY -->
+  <section class="block" id="comprar">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker">Comprar ticket</span>
+        <h2>Genera tu número de la suerte</h2>
+        <p>Un número único e irrepetible por cada compra. ¡Mucha suerte!</p>
+      </div>
+      <div class="buy-grid">
+        <!-- FORM -->
+        <div class="card">
+          <h3>Tus datos</h3>
+          <label for="fName">Nombre y apellido</label>
+          <input id="fName" type="text" placeholder="Ej: María Pérez" />
+          <label for="fContact">Teléfono o correo</label>
+          <input id="fContact" type="text" placeholder="+56 9 1234 5678 / correo@mail.com" />
+          <label for="fStudent">A nombre de <span style="font-weight:600;color:var(--ink-soft)">— opcional</span></label>
+          <input id="fStudent" type="text" placeholder="Referencia o dedicatoria (opcional)" />
+
+          <label>Cantidad de tickets</label>
+          <div class="qty-row">
+            <button class="qty-btn" id="minus" type="button">−</button>
+            <input id="fQty" type="number" min="1" max="50" value="1" style="text-align:center" />
+            <button class="qty-btn" id="plus" type="button">+</button>
+          </div>
+
+          <div class="total-line">
+            <span class="t-lab">Total a pagar</span>
+            <span class="t-val" id="totalVal">$0</span>
+          </div>
+          <p class="hint">
+</p>
+
+          <div class="pay-box">
+            <h4>💳 Cómo pagar</h4>
+            <div id="payMethods"></div>
+            <dl id="payInfo" style="display:none"></dl>
+            <p class="hint" style="margin-bottom:0">El ticket se genera al confirmar tu pago. ¡Guarda tu número!</p>
+          </div>
+
+          <!-- STEP 1: choose payment method -->
+          <div id="payStep">
+            <button class="btn btn-mp" id="payBtn" style="width:100%;justify-content:center;margin-top:16px">
+              <span class="mp-glyph"></span> Pagar <span id="payAmt">$0</span> con Mercado Pago
+            </button>
+            <button class="btn btn-flow" id="flowBtn" style="width:100%;justify-content:center;margin-top:10px">
+              <span class="fl-glyph">⚡</span> Pagar <span id="payAmtFlow">$0</span> con Flow
+            </button>
+            <button class="btn btn-pine" id="transferBtn" style="width:100%;justify-content:center;margin-top:10px">
+              🏦 Pagar por transferencia
+            </button>
+            <p class="hint" id="noPayHint" style="display:none;text-align:center;color:var(--coral);margin-top:10px">
+              El organizador aún no ha configurado el pago con Flow.
+            </p>
+          </div>
+
+          <!-- STEP 2: confirm after paying -->
+          <div id="confirmStep" style="display:none;margin-top:16px">
+            <div id="confirmInfo"></div>
+            <button class="btn btn-sun" id="confirmBuyBtn" style="width:100%;justify-content:center;margin-top:12px">✓  generar mi ticket</button>
+            <div style="display:flex;gap:10px;margin-top:10px">
+              <button class="btn btn-ghost" id="reopenPayBtn" style="flex:1;justify-content:center">Abrir el pago otra vez</button>
+              <button class="btn btn-ghost" id="cancelPayBtn" style="flex:1;justify-content:center">Volver</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- LIVE PREVIEW -->
+        <div class="ticket-stack">
+          <div class="ticket" id="previewTicket">
+            <div class="t-top">
+              <div class="t-org">SORTEOSUR
+                <small>Sorteos online</small>
+              </div>
+              <span class="t-tag">VISTA PREVIA</span>
+            </div>
+            <div class="t-number">
+              <span>Tu número será</span>
+              <b id="pvNumber">0000</b>
+            </div>
+            <div class="t-date"><b>📅 Sorteo: <span id="pvDate">—</span></b></div>
+            <div class="t-foot">
+              <div class="t-holder" id="pvName">— Tu nombre —
+                <small>Portador del ticket</small>
+              </div>
+              <div style="text-align:center">
+                <div class="t-code" id="pvCode">····</div>
+                <small style="color:var(--ink-soft);font-weight:800">código</small>
+              </div>
+            </div>
+          </div>
+          <p class="luck-note">🍀 Mientras más números compres, ¡más chances de ganar!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOOKUP -->
+  <section class="block" id="buscar">
+    <div class="wrap" style="max-width:720px">
+      <div class="sec-head">
+        <span class="kicker">Mi ticket</span>
+        <h2>Consulta tu número</h2>
+        <p>¿Ya compraste? Revisa el estado de tu ticket con tu código.</p>
+      </div>
+      <div class="card">
+        <div class="lookup-row">
+          <input id="lookupCode" type="text" placeholder="Ingresa tu código (ej: 12-A4F9)" />
+          <button class="btn btn-pine" id="lookupBtn">Buscar</button>
+        </div>
+        <div id="lookupResult" style="margin-top:18px"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===================== ADMIN ===================== -->
+<section class="block admin" id="adminPanel">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="kicker">Solo organizadores</span>
+      <h2>Panel de administración</h2>
+      <p>Confirma pagos, revisa la recaudación y realiza el sorteo.</p>
+    </div>
+
+    <div class="draw-banner" id="drawBanner">
+      <h3>🎉 Sorteo final</h3>
+      <p id="drawSub" style="margin:0;opacity:.92;position:relative">Sortea un ganador a la vez — una vez por cada premio, entre los tickets <b>pagados</b>.</p>
+      <div id="winnerBox" style="position:relative"></div>
+      <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;position:relative">
+        <button class="btn btn-sun" id="drawBtn">🎰 Realizar sorteo</button>
+        <button class="btn btn-ghost" id="resetDrawBtn" style="color:#fff;border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.08)">Reiniciar ganadores</button>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat"><b id="stTotal">0</b><span>Tickets totales</span></div>
+      <div class="stat"><b id="stPaid">0</b><span>Pagados</span></div>
+      <div class="stat"><b id="stPending">0</b><span>Pendientes</span></div>
+      <div class="stat"><b id="stMoney">$0</b><span>Recaudado</span></div>
+    </div>
+
+    <div class="toolbar">
+      <input id="searchAdmin" type="text" placeholder="🔎 Buscar por número, nombre o código…" />
+      <button class="btn btn-ghost" id="exportBtn">⬇ Exportar CSV</button>
+      <button class="btn btn-ghost" id="downloadAllBtn">⬇ Tickets (JPG)</button>
+      <button class="btn btn-pine" id="configBtn">⚙ Configurar sorteo</button>
+      <button class="btn btn-ghost" id="resetContestBtn" style="color:var(--coral);border-color:#E8C4BE">🗑 Reiniciar concurso</button>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table id="ticketsTable">
+        <thead>
+          <tr><th>N°</th><th>Código</th><th>Nombre</th><th>Contacto</th><th>Fecha</th><th>Estado</th><th></th></tr>
+        </thead>
+        <tbody id="ticketsBody"></tbody>
+      </table>
+    </div>
+    <p class="hint" style="margin-top:14px">Consejo: marca como <b>pagado</b> solo cuando hayas verificado la transferencia. El sorteo solo considera tickets pagados.</p>
+  </div>
+</section>
+
+<!-- ===================== MODALS ===================== -->
+<div class="overlay" id="ticketOverlay">
+  <div class="modal" id="printArea">
+    <button class="x" id="closeTicket">✕</button>
+    <h3>¡Ticket generado! 🎟️</h3>
+    <p class="sub">Guárdalo o tómale una captura</p>
+    <div id="ticketContainer"></div>
+    <button class="btn btn-pine" id="printTicketBtn" style="width:100%;justify-content:center;margin-top:18px">🖨 Imprimir / Guardar PDF</button>
+    <button class="btn btn-ghost" id="newBuyBtn" style="width:100%;justify-content:center;margin-top:10px">Comprar otro</button>
+  </div>
+</div>
+
+<div class="overlay" id="pwOverlay">
+  <div class="modal" style="max-width:390px">
+    <button class="x" id="closePw">✕</button>
+    <h3>Acceso organizadores</h3>
+    <p class="sub">Ingresa la clave de acceso</p>
+    <input id="pwInput" type="password" placeholder="Clave" />
+    <button class="btn btn-pine" id="pwBtn" style="width:100%;justify-content:center;margin-top:16px">Entrar</button>
+    <p class="hint" id="pwError" style="text-align:center;color:var(--coral);display:none">Clave incorrecta</p>
+  </div>
+</div>
+
+<div class="overlay" id="cfgOverlay">
+  <div class="modal">
+    <button class="x" id="closeCfg">✕</button>
+    <h3>Configurar sorteo</h3>
+    <p class="sub">Estos datos se muestran en toda la página</p>
+    <label>Premios del sorteo</label>
+    <p class="hint" style="margin-top:0">Agrega los premios que quieras. Sube una foto desde tu dispositivo (se optimiza sola). La tarjeta los muestra rotando en orden aleatorio.</p>
+    <div id="cfgPrizeList"></div>
+    <button type="button" class="btn btn-ghost" id="addPrizeBtn" style="width:100%;justify-content:center;margin:2px 0 6px;padding:11px">➕ Agregar premio</button>
+    <label>Valor por ticket (CLP)</label>
+    <input id="cfgPrice" type="number" min="0" />
+    <label>Fecha del sorteo</label>
+    <input id="cfgDate" type="text" placeholder="Ej: 15 de agosto" />
+    <label>Datos de transferencia (uno por línea)</label>
+    <input id="cfgBank" type="text" placeholder="Banco · Cuenta · RUT · Nombre · Correo" />
+    <p class="hint">Formato sugerido: «Banco Estado | Cuenta Vista 12345678 | RUT 11.111.111-1 | SORTEOSUR | correo@mail.com» separando cada dato con « | ».</p>
+    <label>Link de pago Mercado Pago <span style="font-weight:600;color:var(--ink-soft)">— opcional</span></label>
+    <input id="cfgMpLink" type="text" placeholder="https://mpago.la/xxxxx" />
+    <p class="hint">Crea un «Link de pago» en tu cuenta Mercado Pago (idealmente de «monto libre») y pégalo aquí. Aparecerá un botón para pagar al generar el ticket.</p>
+    <label>Link de pago Flow <span style="font-weight:600;color:var(--ink-soft)">— opcional</span></label>
+    <input id="cfgFlowLink" type="text" placeholder="https://www.flow.cl/app/web/pagar.php?..." />
+    <p class="hint">Crea un «Link de pago» (Cobro) en tu cuenta Flow.cl y pégalo aquí. Aparecerá un botón «Pagar con Flow» al comprar.</p>
+    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-top:4px">
+      <input id="cfgFlowApi" type="checkbox" style="width:18px;height:18px;flex:none" />
+      <span>Usar API de Flow (cobra el <b>monto exacto</b> × cantidad y verifica el ticket automáticamente)</span>
+    </label>
+    <p class="hint">Requiere desplegar la Edge Function en Supabase (carpeta <b>flow-supabase</b>). Con esto NO uses link de monto fijo.</p>
+    <label>WhatsApp de contacto <span style="font-weight:600;color:var(--ink-soft)">— solo números, con código de país</span></label>
+    <input id="cfgWhats" type="text" placeholder="Ej: 56912345678" />
+    <p class="hint">Aparece un botón flotante de WhatsApp para que los participantes contacten a los organizadores. Déjalo vacío para ocultarlo.</p>
+    <label>Instagram <span style="font-weight:600;color:var(--ink-soft)">— usuario o link completo</span></label>
+    <input id="cfgInstagram" type="text" placeholder="Ej: @sortesur o https://instagram.com/sortesur" />
+    <label>TikTok <span style="font-weight:600;color:var(--ink-soft)">— usuario o link completo</span></label>
+    <input id="cfgTiktok" type="text" placeholder="Ej: @sortesur o https://tiktok.com/@sortesur" />
+    <button class="btn btn-sun" id="saveCfg" style="width:100%;justify-content:center;margin-top:18px">Guardar cambios</button>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="brand wordmark">
+      <span class="wm-mark"><b>S</b></span>
+      <span><span class="wm-name" style="color:#fff">SORTEO<i style="-webkit-text-fill-color:#C7D2FE">SUR</i></span><span class="wm-sub" style="color:rgba(255,255,255,.6)">Sorteos online</span></span>
+    </div>
+    <div style="text-align:right;font-size:.9rem">
+      <p style="margin:0 0 6px">SORTEOSUR · Sorteos online</p>
+      <p style="margin:0 0 6px;color:rgba(255,255,255,.6);font-weight:700;font-size:.82rem">Bams Spa · RUT 76.919.084-8</p>
+      <a id="footerWhats" href="#" target="_blank" rel="noopener" style="display:none;margin-right:14px">💬 Escríbenos por WhatsApp</a>
+      <a id="footerInsta" href="#" target="_blank" rel="noopener" style="display:none;margin-right:14px">📷 Instagram</a>
+      <a id="footerTiktok" href="#" target="_blank" rel="noopener" style="display:none;margin-right:14px">♪ TikTok</a>
+      <a id="footerAdmin">Acceso organizadores</a>
+    </div>
+  </div>
+</footer>
+
+<a id="waFab" class="wa-fab" href="#" target="_blank" rel="noopener">
+  <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.2 1.6 6L4 29l8.2-1.6c1.8.9 3.8 1.4 5.8 1.4 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 21.8c-1.8 0-3.5-.5-5-1.4l-.4-.2-4.3.8.8-4.2-.2-.4c-1-1.6-1.5-3.4-1.5-5.4C5.4 9.2 10.2 4.6 16 4.6S26.6 9.2 26.6 15 21.8 24.8 16 24.8zm5.6-7.4c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.3-.5-2.5-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.2-.6-.4z"/></svg>
+  <span class="wa-label">WhatsApp</span>
+</a>
+
+<script>
+/* ============ STORAGE (compatible claude.ai con respaldo en memoria) ============ */
+const hasStore = typeof window !== "undefined" && window.storage && typeof window.storage.get === "function";
+let memCache = {};
+async function sGet(key){
+  if(!hasStore){ return memCache[key] ?? null; }
+  try{ const r = await window.storage.get(key, true); return r ? r.value : null; }
+  catch(e){ return null; }
+}
+async function sSet(key,val){
+  if(!hasStore){ memCache[key]=val; return true; }
+  try{ await window.storage.set(key, val, true); return true; }
+  catch(e){ return false; }
+}
+
+/* ============ SUPABASE (sincronización en la nube) ============
+   Rellena estos dos valores con los de TU proyecto Supabase
+   (Project Settings → API). El "anon key" es público y seguro de
+   exponer. Mientras estén vacíos, el sitio funciona en modo local. */
+const SUPABASE_URL = "https://fvjgtphaifyqjvnbtdpv.supabase.co";       // Project URL
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2amd0cGhhaWZ5cWp2bmJ0ZHB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NzMxMDAsImV4cCI6MjEwMDI0OTEwMH0.ig8CVYi00kzjGG5smc9bNTSBoyG8K8BX4ClL-lZFCfo";  // anon key (pública)
+// La clave de organizadores NO vive aquí: se valida en el Edge Function
+// contra el secret ORG_PASSWORD. Nunca se expone en el navegador.
+async function checkOrgPassword(pw){
+  if(!pw) return false;
+  try{
+    const res = await fetch(SUPABASE_URL + "/functions/v1/flow/login", {
+      method:"POST", headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ password: pw })
+    });
+    const data = await res.json();
+    return !!data.ok;
+  }catch(e){
+    alert("No se pudo verificar la clave (sin conexión con el servidor).");
+    return false;
+  }
+}
+
+let sb = null;
+let sbDown = false;
+function useSB(){ return !!sb; }
+function withTimeout(promise, ms, label){
+  return Promise.race([
+    promise,
+    new Promise((_,rej)=>setTimeout(()=>rej(new Error((label||"operaci\u00f3n")+" excedi\u00f3 "+ms+"ms")), ms))
+  ]);
+}
+function initSupabase(){
+  try{
+    if(SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase){
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+  }catch(e){ sb=null; }
+  return useSB();
+}
+function mapTicket(r){
+  return { number:r.number, code:r.code, name:r.name, contact:r.contact,
+    student:r.student||"", status:r.status||"pending", method:r.method||"", order_id:r.order_id||"",
+    price:r.price||0, createdAt:r.created_at||r.createdAt };
+}
+async function sbEnsureConfig(){
+  const { data } = await sb.from("config").select("data").eq("id",1).maybeSingle();
+  if(!data){
+    const seed = { config:stripPw(DEFAULT_STATE.config), winners:[] };
+    await sb.from("config").upsert({ id:1, data:seed });
+    return seed;
+  }
+  return data.data || { config:{}, winners:[] };
+}
+function stripPw(cfg){ const c=Object.assign({},cfg); delete c.pw; return c; }
+async function sbLoadAll(){
+  const cfgData = await sbEnsureConfig();
+  const { data: tk } = await sb.from("tickets").select("*").order("number",{ascending:true});
+  const tickets = (tk||[]).map(mapTicket);
+  const cfg = Object.assign({}, DEFAULT_STATE.config, cfgData.config||{});
+  const maxNum = tickets.reduce((m,t)=>Math.max(m,t.number),0);
+  STATE = {
+    config: cfg,
+    winners: cfgData.winners || [],
+    winner: (cfgData.winners||[])[0] || null,
+    tickets,
+    nextNumber: maxNum + 1
+  };
+}
+async function sbSaveConfig(){
+  if(!useSB()) return;
+  await sb.from("config").upsert({ id:1, data:{ config:stripPw(STATE.config), winners:STATE.winners||[] } });
+}
+async function sbInsertTickets(base, qty){
+  const rows = Array.from({length:qty}, ()=>({
+    code:"…", name:base.name, contact:base.contact, student:base.student,
+    status:base.status, method:base.method, price:base.price, order_id:base.orderId||null
+  }));
+  const { data, error } = await sb.from("tickets").insert(rows).select();
+  if(error){ throw error; }
+  const created = [];
+  for(const r of (data||[])){
+    const code = pad(r.number).slice(-2) + "-" + randCode();
+    await sb.from("tickets").update({ code }).eq("number", r.number);
+    created.push(mapTicket({ ...r, code }));
+  }
+  return created;
+}
+let _syncing=false;
+async function syncRefresh(){
+  if(!useSB() || _syncing) return;
+  _syncing=true;
+  try{
+    await sbLoadAll();
+    renderPublic();
+    if($("#adminPanel") && $("#adminPanel").classList.contains("show")) renderAdmin();
+  }catch(e){}
+  _syncing=false;
+}
+function subscribeRealtime(){
+  if(!useSB()) return;
+  try{
+    sb.channel("raffle-sync")
+      .on("postgres_changes", { event:"*", schema:"public", table:"tickets" }, syncRefresh)
+      .on("postgres_changes", { event:"*", schema:"public", table:"config" }, syncRefresh)
+      .subscribe();
+  }catch(e){}
+}
+
+/* ============ STATE ============ */
+const DEFAULT_STATE = {
+  config:{
+    prize:"Gran premio SORTEOSUR 🎁",
+    prizeImg:"",
+    prizes:[{name:"Gran premio SORTEOSUR 🎁", img:""}],
+    price:2000,
+    date:"Por definir",
+    bank:"Banco : BANCO ESTADO | Tipo de cuenta : Cuenta RUT | N° de cuenta: 18204203-K | Nombre: BORIS MATAMALA",
+    mpLink:"",
+    flowLink:"",
+    flowApi:false,
+    whatsapp:"",
+    instagram:"",
+    tiktok:"",
+    pw:"antu2026"
+  },
+  nextNumber:1,
+  tickets:[],
+  winners:[],
+  winner:null
+};
+let STATE = null;
+
+async function loadState(){
+  if(useSB()){
+    try{
+      await withTimeout(sbLoadAll(), 8000, "Supabase");
+      ensurePrizes();
+      sbDown = false;
+      hideSbDownNotice();
+      return;
+    }catch(e){
+      // La nube no responde (proyecto pausado / sin conexi\u00f3n):
+      // arrancar igual en modo de respaldo para que la web funcione.
+      sbDown = true;
+      console.warn("Supabase no disponible \u2014 modo respaldo local:", e && e.message);
+      STATE = structuredClone(DEFAULT_STATE);
+      ensurePrizes();
+      showSbDownNotice();
+      return;
+    }
+  }
+  const raw = await sGet("raffle:state");
+  if(raw){
+    try{ STATE = typeof raw === "string" ? JSON.parse(raw) : raw; }
+    catch(e){ STATE = structuredClone(DEFAULT_STATE); }
+  } else {
+    STATE = structuredClone(DEFAULT_STATE);
+    await saveState();
+  }
+  // sanity
+  STATE.config = Object.assign({}, DEFAULT_STATE.config, STATE.config||{});
+  // migrate single prize -> prizes[] if needed
+  if(!Array.isArray(STATE.config.prizes) || !STATE.config.prizes.length){
+    STATE.config.prizes = [{name:STATE.config.prize||"", img:STATE.config.prizeImg||""}];
+  }
+  // upgrade the old placeholder bank default to the configured details
+  if(STATE.config.bank === "Banco | Tipo de cuenta | N° de cuenta | RUT | Nombre | correo"){
+    STATE.config.bank = DEFAULT_STATE.config.bank;
+  }
+  STATE.tickets = STATE.tickets||[];
+  STATE.nextNumber = STATE.nextNumber||1;
+  // winners array (migra desde winner único si existe)
+  if(!Array.isArray(STATE.winners)){
+    STATE.winners = STATE.winner ? [{rank:0, prizeName:(getPrizes()[0]||{}).name||"", number:STATE.winner.number, name:STATE.winner.name, code:STATE.winner.code}] : [];
+  }
+}
+function ensurePrizes(){
+  STATE.config = Object.assign({}, DEFAULT_STATE.config, STATE.config||{});
+  if(!Array.isArray(STATE.config.prizes) || !STATE.config.prizes.length){
+    STATE.config.prizes = [{name:STATE.config.prize||"", img:STATE.config.prizeImg||""}];
+  }
+  if(!Array.isArray(STATE.winners)) STATE.winners = [];
+}
+function showSbDownNotice(){
+  let n = document.getElementById("sbDownBar");
+  if(!n){
+    n = document.createElement("div");
+    n.id = "sbDownBar";
+    n.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:80;background:#C24A3C;color:#fff;"
+      + "font-family:'Manrope',sans-serif;font-weight:800;font-size:.86rem;text-align:center;"
+      + "padding:11px 16px;box-shadow:0 -6px 18px -8px rgba(0,0,0,.4)";
+    n.innerHTML = "⚠️ Sin conexión con la base de datos (puede estar pausada). Las compras no se guardarán hasta reactivarla. "
+      + "<a href='#' id='sbRetry' style='color:#fff;text-decoration:underline;margin-left:6px'>Reintentar</a>";
+    document.body.appendChild(n);
+    n.querySelector("#sbRetry").onclick = async (e)=>{ e.preventDefault(); await loadState(); renderPublic(); if($("#adminPanel").classList.contains("show")) renderAdmin(); };
+  }
+  n.style.display = "block";
+}
+function hideSbDownNotice(){ const n=document.getElementById("sbDownBar"); if(n) n.style.display="none"; }
+async function saveState(){
+  if(useSB()){ await sbSaveConfig(); return; }
+  await sSet("raffle:state", JSON.stringify(STATE));
+}
+
+/* ============ HELPERS ============ */
+const $ = s => document.querySelector(s);
+const fmt = n => "$" + (Number(n)||0).toLocaleString("es-CL");
+const pad = n => String(n).padStart(4,"0");
+function randCode(){
+  const c = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let s=""; for(let i=0;i<4;i++) s+=c[Math.floor(Math.random()*c.length)];
+  return s;
+}
+function escapeHtml(s){ return String(s||"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m])); }
+
+/* ============ RENDER PUBLIC ============ */
+function getPrizes(){
+  const c = STATE.config;
+  if(Array.isArray(c.prizes) && c.prizes.length){
+    const list = c.prizes.filter(p=>p && (p.name||"").trim());
+    if(list.length) return list.map(p=>({name:p.name.trim(), img:(p.img||"").trim()}));
+  }
+  return [{name:c.prize||"—", img:(c.prizeImg||"").trim()}];
+}
+function shuffleIdx(n, avoidFirst){
+  const a = [...Array(n).keys()];
+  for(let k=a.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); [a[k],a[j]]=[a[j],a[k]]; }
+  if(avoidFirst!=null && a.length>1 && a[0]===avoidFirst){ [a[0],a[1]]=[a[1],a[0]]; }
+  return a;
+}
+const RANKS = ["1er premio","2º premio","3er premio","4º premio","5º premio"];
+let prizeTimer=null, lastPrizeSig="", prizeFirstPaint=true, drawing=false;
+function renderPrizeDots(n){
+  const d = $("#prizeDots");
+  d.innerHTML = n>1 ? Array.from({length:n},()=>"<i></i>").join("") : "";
+}
+function setActiveDot(idx){
+  const dots = $("#prizeDots").children;
+  for(let i=0;i<dots.length;i++) dots[i].classList.toggle("active", i===idx);
+}
+function paintPrize(prizes, idx){
+  const p = prizes[idx] || prizes[0]; if(!p) return;
+  const ph=$("#prizePhoto"), nm=$("#prizeName"), rb=$("#prizeRibbon"), kc=$("#prizeKicker");
+  const apply=()=>{
+    if(p.img){ ph.style.backgroundImage=`url("${p.img.replace(/"/g,'&quot;')}")`; ph.classList.add("has-img"); ph.innerHTML=""; }
+    else { ph.style.backgroundImage="none"; ph.classList.remove("has-img"); ph.innerHTML='<span class="ph-label">foto del premio</span>'; }
+    nm.textContent = p.name;
+    rb.textContent = prizes.length>1 ? rankName(idx) : "¡Gran premio!";
+    kc.textContent = prizes.length>1 ? "Uno de los premios" : "El ganador se lleva";
+    setActiveDot(idx);
+    ph.style.opacity=1; nm.style.opacity=1; rb.style.opacity=1;
+  };
+  if(prizeFirstPaint){ prizeFirstPaint=false; apply(); return; }
+  ph.style.opacity=0; nm.style.opacity=0; rb.style.opacity=0;
+  setTimeout(apply, 240);
+}
+function startPrizeCycle(){
+  const prizes = getPrizes();
+  const sig = JSON.stringify(prizes);
+  if(sig===lastPrizeSig && prizeTimer!==null) return; // already cycling this set
+  lastPrizeSig = sig;
+  if(prizeTimer){ clearInterval(prizeTimer); prizeTimer=null; }
+  prizeFirstPaint = true;
+  renderPrizeDots(prizes.length);
+  let order = shuffleIdx(prizes.length);
+  let i = 0;
+  paintPrize(prizes, order[0]);
+  if(prizes.length < 2) return;
+  prizeTimer = setInterval(()=>{
+    i++;
+    if(i >= order.length){ order = shuffleIdx(prizes.length, order[order.length-1]); i=0; }
+    paintPrize(prizes, order[i]);
+  }, 3600);
+}
+function renderPublic(){
+  const c = STATE.config;
+  $("#prizePrice").textContent = fmt(c.price);
+  $("#prizeDate").textContent = c.date;
+  startPrizeCycle();
+  const sold = STATE.tickets.length;
+  const paid = STATE.tickets.filter(t=>t.status==="paid").length;
+  $("#pvNumber").textContent = pad(STATE.nextNumber);
+  $("#pvDate").textContent = c.date || "Por definir";
+  // WhatsApp de contacto
+  const wnum = (c.whatsapp||"").replace(/[^0-9]/g,"");
+  const fab=$("#waFab"), fwa=$("#footerWhats");
+  if(wnum){
+    const url="https://wa.me/"+wnum+"?text="+encodeURIComponent("¡Hola! Tengo una consulta sobre el sorteo de SORTEOSUR 🎟️");
+    if(fab){ fab.href=url; fab.classList.add("show"); }
+    if(fwa){ fwa.href=url; fwa.style.display="inline"; }
+  } else {
+    if(fab) fab.classList.remove("show");
+    if(fwa) fwa.style.display="none";
+  }
+  // Redes sociales
+  const socialUrl=(v,base)=>{ v=(v||"").trim(); if(!v) return ""; if(/^https?:\/\//i.test(v)) return v; return base+v.replace(/^@/,""); };
+  const iUrl=socialUrl(c.instagram,"https://instagram.com/"), tUrl=socialUrl(c.tiktok,"https://tiktok.com/@");
+  const fi=$("#footerInsta"), ft=$("#footerTiktok");
+  if(fi){ if(iUrl){ fi.href=iUrl; fi.style.display="inline"; } else fi.style.display="none"; }
+  if(ft){ if(tUrl){ ft.href=tUrl; ft.style.display="inline"; } else ft.style.display="none"; }
+  // pay info
+  const parts = (c.bank||"").split("|").map(x=>x.trim()).filter(Boolean);
+  $("#payInfo").innerHTML = parts.length
+    ? parts.map(p=>`<dt>•</dt><dd>${escapeHtml(p)}</dd>`).join("")
+    : `<dt>•</dt><dd>Configura los datos de pago en el panel de organizadores.</dd>`;
+  // payment methods (Mercado Pago and/or bank transfer)
+  // Solo se habilita el pago con Flow
+  const hasFlow = !!c.flowLink || !!c.flowApi;
+  const methods = [];
+  if(hasFlow) methods.push("Flow");
+  const pm = $("#payMethods");
+  pm.innerHTML = methods.length
+    ? `<div class="pay-mp-note"><span class="mp-dot"></span>Paga de forma segura con Flow. Tu ticket se genera al confirmar el pago.</div>`
+    : "";
+  // gate the method buttons by what's configured (solo Flow)
+  const payBtn = $("#payBtn"), flowBtn = $("#flowBtn"), tBtn = $("#transferBtn"), noHint = $("#noPayHint");
+  if(payBtn) payBtn.style.display = "none";
+  if(flowBtn) flowBtn.style.display = hasFlow ? "" : "none";
+  if(tBtn) tBtn.style.display = "none";
+  if(noHint) noHint.style.display = hasFlow ? "none" : "block";
+  updateTotal();
+}
+function updateTotal(){
+  let q = parseInt($("#fQty").value)||1;
+  q = Math.max(1, Math.min(50, q));
+  $("#fQty").value = q;
+  $("#totalVal").textContent = fmt(q * STATE.config.price);
+  const amt = $("#payAmt"); if(amt) amt.textContent = fmt(q * STATE.config.price);
+  const amtF = $("#payAmtFlow"); if(amtF) amtF.textContent = fmt(q * STATE.config.price);
+  $("#pvName").firstChild.textContent = ($("#fName").value.trim() || "— Tu nombre —");
+}
+
+/* ============ BUY ============ */
+async function buyTickets(){
+  const name = $("#fName").value.trim();
+  const contact = $("#fContact").value.trim();
+  const student = $("#fStudent").value.trim();
+  let qty = Math.max(1, Math.min(50, parseInt($("#fQty").value)||1));
+  if(!name){ alert("Por favor ingresa tu nombre."); $("#fName").focus(); return; }
+  if(!contact){ alert("Por favor ingresa un teléfono o correo de contacto."); $("#fContact").focus(); return; }
+
+  $("#confirmBuyBtn").disabled = true;
+  await loadState(); // refrescar para evitar números duplicados
+
+  let created = [];
+  if(useSB()){
+    try{
+      created = await sbInsertTickets(
+        { name, contact, student, status:"pending", method:currentPayMethod, price:STATE.config.price },
+        qty
+      );
+    }catch(e){
+      $("#confirmBuyBtn").disabled = false;
+      alert("No se pudo registrar el ticket en la base de datos. Revisa tu conexi\u00f3n e int\u00e9ntalo de nuevo.");
+      return;
+    }
+    await syncRefresh();
+  } else {
+    const stamp = new Date().toISOString();
+    for(let i=0;i<qty;i++){
+      const num = STATE.nextNumber++;
+      const t = {
+        number:num,
+        code: pad(num).slice(-2) + "-" + randCode(),
+        name, contact, student,
+        status:"pending",
+        method: currentPayMethod,
+        price: STATE.config.price,
+        createdAt: stamp
+      };
+      STATE.tickets.push(t);
+      created.push(t);
+    }
+    await saveState();
+    renderPublic();
+  }
+  $("#confirmBuyBtn").disabled = false;
+  resetPayFlow();
+  showTickets(created);
+}
+
+function resetPayFlow(){
+  $("#confirmStep").style.display = "none";
+  $("#payStep").style.display = "";
+}
+function openPayLink(){
+  const url = currentPayMethod==="flow" ? STATE.config.flowLink : STATE.config.mpLink;
+  if(url) window.open(url, "_blank", "noopener");
+}
+function bankParts(){
+  return (STATE.config.bank||"").split("|").map(x=>x.trim()).filter(Boolean);
+}
+function validateBuyer(){
+  const name = $("#fName").value.trim();
+  const contact = $("#fContact").value.trim();
+  if(!name){ alert("Por favor ingresa tu nombre."); $("#fName").focus(); return false; }
+  if(!contact){ alert("Por favor ingresa un teléfono o correo de contacto."); $("#fContact").focus(); return false; }
+  return true;
+}
+let currentPayMethod = "mp";
+function buyTotal(){
+  const q = Math.max(1, Math.min(50, parseInt($("#fQty").value)||1));
+  return q * STATE.config.price;
+}
+function goConfirm(method){
+  currentPayMethod = method;
+  const info = $("#confirmInfo");
+  if(method === "mp"){
+    info.innerHTML = `<div class="confirm-note"><b>Completa el pago</b> en la pestaña de Mercado Pago que se abrió. Cuando termines, genera tu ticket aquí abajo.</div>`;
+    $("#reopenPayBtn").style.display = "";
+  } else if(method === "flow"){
+    info.innerHTML = `<div class="confirm-note"><b>Completa el pago</b> en la pestaña de Flow que se abrió. Cuando termines, genera tu ticket aquí abajo.</div>`;
+    $("#reopenPayBtn").style.display = "";
+  } else {
+    const parts = bankParts();
+    info.innerHTML = `<div class="confirm-note confirm-note--bank"><b>Transfiere ${fmt(buyTotal())}</b> a estos datos y luego genera tu ticket:
+      <ul class="bank-list">${parts.map(p=>`<li>${escapeHtml(p)}</li>`).join("")}</ul>
+      Envía el comprobante a los organizadores indicando tu número de ticket.</div>`;
+    $("#reopenPayBtn").style.display = "none";
+  }
+  $("#payStep").style.display = "none";
+  $("#confirmStep").style.display = "block";
+}
+function payMP(){
+  currentPayMethod = "mp";
+  if(!STATE.config.mpLink){ alert("El organizador aún no ha configurado el link de pago de Mercado Pago."); return; }
+  if(!validateBuyer()) return;
+  openPayLink();
+  goConfirm("mp");
+}
+function payFlow(){
+  currentPayMethod = "flow";
+  if(STATE.config.flowApi){ startFlowApi(); return; }
+  if(!STATE.config.flowLink){ alert("El organizador aún no ha configurado el pago con Flow."); return; }
+  if(!validateBuyer()) return;
+  openPayLink();
+  goConfirm("flow");
+}
+async function startFlowApi(){
+  const name = $("#fName").value.trim();
+  const contact = $("#fContact").value.trim();
+  const student = $("#fStudent").value.trim();
+  const qty = Math.max(1, Math.min(50, parseInt($("#fQty").value)||1));
+  if(!name){ alert("Por favor ingresa tu nombre."); $("#fName").focus(); return; }
+  if(!contact){ alert("Por favor ingresa un teléfono o correo de contacto."); $("#fContact").focus(); return; }
+  if(!useSB()){ alert("El pago con Flow requiere conexión con la base de datos."); return; }
+  const btn = $("#flowBtn"); const old = btn ? btn.innerHTML : "";
+  if(btn){ btn.disabled = true; btn.innerHTML = "Redirigiendo a Flow…"; }
+  try{
+    await loadState();
+    const orderId = "SS-" + Date.now() + "-" + Math.random().toString(36).slice(2,7);
+    const amount = qty * STATE.config.price;
+    await sbInsertTickets({ name, contact, student, status:"pending", method:"flow", price:STATE.config.price, orderId }, qty);
+    const email = /@/.test(contact) ? contact : "";
+    const res = await fetch(SUPABASE_URL + "/functions/v1/flow/crear", {
+      method:"POST", headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ orderId, amount, email, subject:"Sorteo SORTEOSUR · "+qty+" número(s)" })
+    });
+    const data = await res.json();
+    if(data.redirect){ window.location.href = data.redirect; }
+    else { throw new Error(data.error || "No se pudo crear el pago"); }
+  }catch(e){
+    if(btn){ btn.disabled = false; btn.innerHTML = old; }
+    alert("No se pudo iniciar el pago con Flow: " + (e && e.message ? e.message : e) + "\n\nVerifica que la Edge Function esté desplegada.");
+  }
+}
+async function handleFlowReturn(){
+  const p = new URLSearchParams(location.search);
+  const order = p.get("order");
+  if(!order || !useSB()) return;
+  try{
+    const { data } = await sb.from("tickets").select("*").eq("order_id", order).order("number",{ascending:true});
+    const list = (data||[]).map(mapTicket);
+    history.replaceState(null, "", location.pathname);
+    if(list.length){
+      const paid = list.every(t=>t.status==="paid");
+      showTickets(list);
+      const note = document.createElement("div");
+      note.style.cssText = "margin:0 0 14px;padding:12px 16px;border-radius:14px;font-weight:800;text-align:center;"+
+        (paid ? "background:#EAF7F0;color:#1B7A54;border:1px solid #BFE5D4" : "background:#FFF3D6;color:#8a5b12;border:1px solid #F5C21A");
+      note.textContent = paid ? "✅ ¡Pago confirmado! Tus números quedaron registrados." : "⏳ Pago en proceso. Tus números se confirmarán al acreditarse el pago.";
+      const c = $("#ticketContainer"); c.insertBefore(note, c.firstChild);
+    }
+  }catch(e){}
+}
+function payTransfer(){
+  if(!bankParts().length){ alert("El organizador aún no ha configurado los datos de transferencia."); return; }
+  if(!validateBuyer()) return;
+  goConfirm("transfer");
+}
+
+/* ============ TICKET → JPG (canvas) ============ */
+function rrect(ctx,x,y,w,h,r){
+  if(typeof r==="number") r={tl:r,tr:r,br:r,bl:r};
+  ctx.beginPath();
+  ctx.moveTo(x+r.tl,y);
+  ctx.lineTo(x+w-r.tr,y); ctx.arcTo(x+w,y,x+w,y+r.tr,r.tr);
+  ctx.lineTo(x+w,y+h-r.br); ctx.arcTo(x+w,y+h,x+w-r.br,y+h,r.br);
+  ctx.lineTo(x+r.bl,y+h); ctx.arcTo(x,y+h,x,y+h-r.bl,r.bl);
+  ctx.lineTo(x,y+r.tl); ctx.arcTo(x,y,x+r.tl,y,r.tl);
+  ctx.closePath();
+}
+function fitText(ctx, text, maxW){
+  let s=text;
+  while(s.length>4 && ctx.measureText(s).width>maxW){ s=s.slice(0,-1); }
+  return s===text ? s : s.replace(/…?$/,"…");
+}
+async function renderTicketCanvas(t){
+  try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
+  const W=1080,H=640,S=2;
+  const cv=document.createElement("canvas"); cv.width=W*S; cv.height=H*S;
+  const ctx=cv.getContext("2d"); ctx.scale(S,S);
+  ctx.textBaseline="alphabetic";
+  // fondo
+  ctx.fillStyle="#F3F1EB"; ctx.fillRect(0,0,W,H);
+  // tarjeta
+  const cx=28,cy=28,cw=W-56,ch=H-56,cr=30;
+  ctx.save(); ctx.shadowColor="rgba(20,28,40,.20)"; ctx.shadowBlur=44; ctx.shadowOffsetY=22;
+  ctx.fillStyle="#fff"; rrect(ctx,cx,cy,cw,ch,cr); ctx.fill(); ctx.restore();
+  // banda encabezado (degradado)
+  const hh=132;
+  ctx.save(); rrect(ctx,cx,cy,cw,hh,{tl:cr,tr:cr,br:0,bl:0}); ctx.clip();
+  const hg=ctx.createLinearGradient(cx,cy,cx+cw,cy+hh);
+  hg.addColorStop(0,"#1F8A6B"); hg.addColorStop(.48,"#2A6FB0"); hg.addColorStop(1,"#E8923A");
+  ctx.fillStyle=hg; ctx.fillRect(cx,cy,cw,hh); ctx.restore();
+  // textos encabezado
+  ctx.fillStyle="#fff"; ctx.font="700 38px Sora, sans-serif";
+  ctx.fillText("SORTEOSUR", cx+44, cy+64);
+  ctx.fillStyle="rgba(255,255,255,.9)"; ctx.font="800 17px Manrope, sans-serif";
+  ctx.fillText("SORTEOS ONLINE", cx+44, cy+94);
+  // pill estado
+  const paid=t.status==="paid";
+  const pill=paid?"PAGADO":"POR PAGAR";
+  ctx.font="700 18px Sora, sans-serif";
+  const pw=ctx.measureText(pill).width+36, ph=36, px=cx+cw-44-pw, py=cy+38;
+  ctx.fillStyle="#fff"; rrect(ctx,px,py,pw,ph,18); ctx.fill();
+  ctx.fillStyle=paid?"#143655":"#9A6B16"; ctx.textAlign="center";
+  ctx.fillText(pill, px+pw/2, py+24); ctx.textAlign="left";
+  // línea de corte + muescas
+  const ty=cy+hh;
+  ctx.fillStyle="#F3F1EB";
+  ctx.beginPath(); ctx.arc(cx,ty,18,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx+cw,ty,18,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle="#E2DCD0"; ctx.lineWidth=2; ctx.setLineDash([9,7]);
+  ctx.beginPath(); ctx.moveTo(cx+34,ty); ctx.lineTo(cx+cw-34,ty); ctx.stroke(); ctx.setLineDash([]);
+  // número
+  ctx.textAlign="center";
+  ctx.fillStyle="#1F4E79"; ctx.font="800 20px Manrope, sans-serif";
+  ctx.fillText("TU NÚMERO DE LA SUERTE", cx+cw/2, ty+66);
+  ctx.font="800 132px Sora, sans-serif";
+  const ng=ctx.createLinearGradient(cx+cw/2-220,0,cx+cw/2+220,0);
+  ng.addColorStop(0,"#1F4E79"); ng.addColorStop(.42,"#2A6FB0"); ng.addColorStop(.78,"#B97A22"); ng.addColorStop(1,"#C24A3C");
+  ctx.fillStyle=ng; ctx.fillText(pad(t.number), cx+cw/2, ty+188);
+  ctx.textAlign="left";
+  // pie: portador + código (izq), QR (der)
+  const fy=ty+232;
+  ctx.fillStyle="#1B2430"; ctx.font="800 30px Manrope, sans-serif";
+  ctx.fillText(fitText(ctx, t.name||"", cw-280), cx+44, fy);
+  ctx.fillStyle="#5E6873"; ctx.font="800 15px Manrope, sans-serif";
+  ctx.fillText((t.student?("A NOMBRE DE "+t.student):"PORTADOR DEL TICKET").toUpperCase(), cx+44, fy+28);
+  ctx.fillStyle="#B97A22"; ctx.font="700 30px Sora, sans-serif";
+  ctx.fillText(t.code||"", cx+44, fy+74);
+  ctx.fillStyle="#5E6873"; ctx.font="800 14px Manrope, sans-serif";
+  ctx.fillText("GUARDA ESTE CÓDIGO", cx+44, fy+98);
+  // QR
+  const qcv=document.createElement("canvas");
+  try{ new QRious({element:qcv,value:`ANTU-${pad(t.number)}-${t.code}`,size:170,foreground:"#1F6E5C",background:"#ffffff",level:"M"}); }catch(e){}
+  const qs=168, qx=cx+cw-44-qs, qy=fy-34;
+  ctx.fillStyle="#fff"; rrect(ctx,qx-9,qy-9,qs+18,qs+18,14); ctx.fill();
+  ctx.strokeStyle="#E2DCD0"; ctx.lineWidth=1; rrect(ctx,qx-9,qy-9,qs+18,qs+18,14); ctx.stroke();
+  if(qcv.width){ ctx.drawImage(qcv,qx,qy,qs,qs); }
+  // pastilla fecha del sorteo
+  ctx.font="800 18px Manrope, sans-serif";
+  const dtxt="📅  SORTEO: "+(STATE.config.date||"Por definir").toUpperCase();
+  const dw=ctx.measureText(dtxt).width+38, dh=38, ddx=cx+cw/2-dw/2, ddy=534;
+  ctx.fillStyle="#EAE5DA"; rrect(ctx,ddx,ddy,dw,dh,19); ctx.fill();
+  ctx.fillStyle="#143655"; ctx.textAlign="center"; ctx.fillText(dtxt, cx+cw/2, ddy+25); ctx.textAlign="left";
+  // pie premio
+  ctx.textAlign="center"; ctx.fillStyle="#5E6873"; ctx.font="700 17px Manrope, sans-serif";
+  const prizes=getPrizes().map(p=>p.name).join(" · ");
+  const foot=(getPrizes().length>1?"Premios: ":"Premio: ")+prizes;
+  ctx.fillText(fitText(ctx, foot, cw-80), cx+cw/2, cy+ch-38);
+  ctx.fillStyle="#8890A0"; ctx.font="800 13px Manrope, sans-serif";
+  ctx.fillText("ORGANIZA: BAMS SPA · RUT 76.919.084-8", cx+cw/2, cy+ch-16);
+  ctx.textAlign="left";
+  return cv;
+}
+async function triggerTicketDownload(t, btn){
+  let old;
+  if(btn){ btn.disabled=true; old=btn.innerHTML; btn.innerHTML="Generando JPG…"; }
+  try{
+    const cv=await renderTicketCanvas(t);
+    const url=cv.toDataURL("image/jpeg",0.95);
+    const a=document.createElement("a"); a.href=url; a.download="ticket-"+pad(t.number)+".jpg";
+    document.body.appendChild(a); a.click(); a.remove();
+  }catch(e){ alert("No se pudo generar el JPG. Intenta de nuevo."); }
+  if(btn){ btn.disabled=false; btn.innerHTML=old; }
+}
+function downloadTicketJpg(idx, btn){ const t=(window._lastTickets||[])[idx]; if(t) triggerTicketDownload(t, btn); }
+function downloadLookupJpg(btn){ if(window._lookupTicket) triggerTicketDownload(window._lookupTicket, btn); }
+async function downloadTicketsList(list, btn){
+  if(!list || !list.length) return;
+  let old; if(btn){ btn.disabled=true; old=btn.innerHTML; }
+  for(let i=0;i<list.length;i++){
+    if(btn) btn.innerHTML="Generando "+(i+1)+"/"+list.length+"…";
+    try{
+      const cv=await renderTicketCanvas(list[i]);
+      const url=cv.toDataURL("image/jpeg",0.95);
+      const a=document.createElement("a"); a.href=url; a.download="ticket-"+pad(list[i].number)+".jpg";
+      document.body.appendChild(a); a.click(); a.remove();
+      await new Promise(r=>setTimeout(r, 500));
+    }catch(e){}
+  }
+  if(btn){ btn.disabled=false; btn.innerHTML=old; }
+}
+function downloadAllCreated(btn){ downloadTicketsList(window._lastTickets||[], btn); }
+async function downloadAllAdmin(btn){
+  const list=(STATE.tickets||[]).slice().sort((a,b)=>a.number-b.number);
+  if(!list.length){ alert("Aún no hay tickets para descargar."); return; }
+  if(list.length>15 && !confirm("Vas a descargar "+list.length+" tickets como imágenes JPG (un archivo cada uno). ¿Continuar?")) return;
+  await downloadTicketsList(list, btn);
+}
+function downloadAdminJpg(num, btn){
+  const t = (STATE.tickets||[]).find(x=>x.number===num);
+  if(t) triggerTicketDownload(t, btn);
+}
+window.downloadTicketJpg=downloadTicketJpg; window.downloadLookupJpg=downloadLookupJpg;
+window.downloadAllCreated=downloadAllCreated; window.downloadAllAdmin=downloadAllAdmin;
+window.downloadAdminJpg=downloadAdminJpg;
+
+/* ============ TICKET RENDER (modal) ============ */
+function ticketHtml(t, idx){
+  const c = STATE.config;
+  const id = "qr_"+t.number;
+  setTimeout(()=>{ try{ new QRious({element:document.getElementById(id),value:`ANTU-${pad(t.number)}-${t.code}`,size:84,foreground:"#1F6E5C",background:"#ffffff",level:"M"}); }catch(e){} },10);
+  return `
+  <div class="ticket" style="margin-bottom:16px">
+    <div class="t-top">
+      <div class="t-org">SORTEOSUR<small>Sorteos online</small></div>
+      <span class="status-pill ${t.status==="paid"?"st-paid":"st-pending"}">${t.status==="paid"?"Pagado":"Por pagar"}</span>
+    </div>
+    <div class="t-number"><span>Tu número de la suerte</span><b>${pad(t.number)}</b></div>
+    <div class="t-foot">
+      <div class="t-holder">${escapeHtml(t.name)}<small>${escapeHtml(t.student?("A nombre de "+t.student):"Portador del ticket")}</small>
+        <div style="margin-top:8px" class="t-code">${escapeHtml(t.code)}</div>
+        <small style="color:var(--ink-soft);font-weight:800">guarda este código</small>
+      </div>
+      <canvas id="${id}"></canvas>
+    </div>
+    <div class="t-date"><b>📅 Sorteo: <span>${escapeHtml(c.date||"Por definir")}</span></b></div>
+    <p style="text-align:center;margin:8px 0 0;font-weight:700;color:var(--ink-soft);font-size:.84rem">${getPrizes().length>1?"Premios":"Premio"}: ${escapeHtml(getPrizes().map(p=>p.name).join(" · "))}</p>
+    <p style="text-align:center;margin:10px 0 0;font-weight:800;color:var(--ink-soft);font-size:.68rem;letter-spacing:.04em;opacity:.85">Organiza: Bams Spa · RUT 76.919.084-8</p>
+  </div>
+  <button class="btn btn-sun" style="width:100%;justify-content:center;margin:0 0 18px" onclick="downloadTicketJpg(${idx||0}, this)">⬇ Descargar este ticket (JPG)</button>`;
+}
+function showTickets(list){
+  window._lastTickets = list;
+  const total = list.reduce((a,t)=>a+(t.price||0),0);
+  const nums = list.map(t=>pad(t.number)).join(", ");
+  const allBar = list.length>1
+    ? `<button class="btn btn-pine" style="width:100%;justify-content:center;margin-bottom:16px" onclick="downloadAllCreated(this)">⬇ Descargar los ${list.length} tickets (JPG)</button>`
+    : "";
+  $("#ticketContainer").innerHTML = allBar + list.map((t,i)=>ticketHtml(t,i)).join("") + verifyingNoteHtml(total, nums, currentPayMethod);
+  $("#ticketOverlay").classList.add("show");
+}
+function verifyingNoteHtml(total, nums, method){
+  const label = method==="transfer" ? "Transferencia registrada" : method==="flow" ? "Pago por Flow registrado" : "Pago por Mercado Pago registrado";
+  return `
+  <div class="pay-panel" style="background:#EAF7F0;border-color:#BFE5D4">
+    <p style="margin:0;font-weight:800;color:var(--pine-deep);text-align:center;font-size:1.02rem">✓ ${label}</p>
+    ${total!=null?`<p class="hint" style="text-align:center;margin:6px 0 0">Total: <b>${fmt(total)}</b>${nums?` · N° ${escapeHtml(nums)}`:""}</p>`:""}
+    <p class="hint" style="text-align:center;margin:8px 0 0">Confirmaremos tu ticket apenas verifiquemos el pago. ¡Guarda tu número y código!</p>
+  </div>`;
+}
+
+/* ============ LOOKUP ============ */
+function lookup(){
+  const q = $("#lookupCode").value.trim().toUpperCase();
+  const box = $("#lookupResult");
+  if(!q){ box.innerHTML=""; return; }
+  const t = STATE.tickets.find(x=>x.code.toUpperCase()===q || pad(x.number)===q);
+  if(!t){ box.innerHTML = `<p class="notice" style="margin:0">No encontramos ese código. Revisa que esté bien escrito.</p>`; return; }
+  const winEntry = (STATE.winners||[]).find(w=>w.number===t.number);
+  const won = !!winEntry;
+  window._lookupTicket = t;
+  const payBlock = (t.status!=="paid" && !won)
+    ? `<div style="margin-top:14px">${verifyingNoteHtml(t.price||STATE.config.price, pad(t.number), t.method)}</div>`
+    : "";
+  box.innerHTML = `
+    <div class="ticket">
+      <div class="t-top"><div class="t-org">Ticket N° ${pad(t.number)}</div>
+      <span class="status-pill ${t.status==="paid"?"st-paid":"st-pending"}">${t.status==="paid"?"Pagado ✓":"Por pagar"}</span></div>
+      <div class="t-number"><span>Portador</span><b style="font-size:1.7rem;color:var(--pine-deep)">${escapeHtml(t.name)}</b></div>
+      ${won?`<p style="text-align:center;color:var(--sun-deep);font-family:'Sora';font-size:1.3rem;font-weight:700;margin:6px 0">🏆 ¡Ganaste${winEntry.prizeName?": "+escapeHtml(winEntry.prizeName):""}!</p>`:""}
+      <p style="text-align:center;margin:6px 0 0;color:var(--ink-soft);font-weight:700">Código ${escapeHtml(t.code)}</p>
+      <div class="t-date" style="margin-top:14px"><b>📅 Sorteo: <span>${escapeHtml(STATE.config.date||"Por definir")}</span></b></div>
+    </div>
+    <button class="btn btn-sun" style="width:100%;justify-content:center;margin-top:14px" onclick="downloadLookupJpg(this)">⬇ Descargar ticket (JPG)</button>
+    ${payBlock}`;
+}
+
+/* ============ ADMIN ============ */
+function renderAdmin(){
+  const tk = STATE.tickets;
+  const paid = tk.filter(t=>t.status==="paid");
+  $("#stTotal").textContent = tk.length;
+  $("#stPaid").textContent = paid.length;
+  $("#stPending").textContent = tk.length - paid.length;
+  $("#stMoney").textContent = fmt(paid.reduce((a,t)=>a+(t.price||0),0));
+  const q = ($("#searchAdmin").value||"").toLowerCase();
+  const rows = tk.slice().sort((a,b)=>b.number-a.number).filter(t=>{
+    if(!q) return true;
+    return pad(t.number).includes(q)||t.code.toLowerCase().includes(q)||(t.name||"").toLowerCase().includes(q)||(t.contact||"").toLowerCase().includes(q);
+  });
+  $("#ticketsBody").innerHTML = rows.length ? rows.map(t=>`
+    <tr>
+      <td><b>${pad(t.number)}</b></td>
+      <td>${escapeHtml(t.code)}</td>
+      <td>${escapeHtml(t.name)}${t.student?`<br><small style="color:var(--ink-soft)">${escapeHtml(t.student)}</small>`:""}${t.method?`<br><small style="color:var(--ink-soft)">vía ${t.method==="transfer"?"transferencia":t.method==="flow"?"Flow":"Mercado Pago"}</small>`:""}</td>
+      <td>${escapeHtml(t.contact)}</td>
+      <td>${new Date(t.createdAt).toLocaleDateString("es-CL")}</td>
+      <td><span class="status-pill ${t.status==="paid"?"st-paid":"st-pending"}">${t.status==="paid"?"Pagado":"Pendiente"}</span></td>
+      <td>
+        ${t.status==="paid"
+          ? `<button class="btn btn-sun mini" onclick="downloadAdminJpg(${t.number}, this)">⬇ JPG</button>
+             <button class="btn btn-ghost mini" onclick="setStatus(${t.number},'pending')">Marcar pendiente</button>`
+          : `<button class="btn btn-pine mini" onclick="setStatus(${t.number},'paid')">Confirmar pago</button>`}
+        <button class="btn btn-ghost mini" style="color:var(--coral);border-color:#f3c6c6" onclick="delTicket(${t.number})">🗑</button>
+      </td>
+    </tr>`).join("") : `<tr><td colspan="7" style="text-align:center;color:var(--ink-soft);padding:24px">Aún no hay tickets vendidos.</td></tr>`;
+  // winner banner
+  if(STATE.winners && STATE.winners.length){
+    const multi = getPrizes().length>1;
+    $("#winnerBox").innerHTML = STATE.winners.map(w=>`
+      <div class="winner-row">
+        <span class="winner-rank">${multi ? (RANKS[w.rank]||("Premio "+(w.rank+1))) : "Ganador"}</span>
+        <div class="winner-num">${pad(w.number)}</div>
+        <p style="margin:0;font-weight:800">🏆 ${escapeHtml(w.name)} — código ${escapeHtml(w.code)}</p>
+        <p class="winner-prize">Gana: ${escapeHtml(w.prizeName||"—")}</p>
+      </div>`).join("");
+  } else { $("#winnerBox").innerHTML=""; }
+  updateDrawButton();
+}
+async function setStatus(num,st){
+  if(useSB()){
+    await sb.from("tickets").update({ status:st }).eq("number", num);
+    await syncRefresh();
+    return;
+  }
+  await loadState();
+  const t = STATE.tickets.find(x=>x.number===num); if(t){ t.status=st; await saveState(); renderAdmin(); renderPublic(); }
+}
+async function delTicket(num){
+  if(!confirm("¿Eliminar el ticket N° "+pad(num)+"? Esta acción no se puede deshacer.")) return;
+  await loadState();
+  STATE.tickets = STATE.tickets.filter(x=>x.number!==num);
+  STATE.winners = (STATE.winners||[]).filter(w=>w.number!==num);
+  STATE.winner = STATE.winners[0] || null;
+  if(useSB()){
+    await sb.from("tickets").delete().eq("number", num);
+    await sbSaveConfig();
+    await syncRefresh();
+    return;
+  }
+  await saveState(); renderAdmin(); renderPublic();
+}
+window.setStatus = setStatus; window.delTicket = delTicket;
+
+async function drawWinner(){
+  await loadState();
+  const prizes = getPrizes();
+  const already = (STATE.winners||[]).length;
+  if(already >= prizes.length){
+    alert("Ya se sortearon todos los premios. Usa «Reiniciar ganadores» para sortear de nuevo.");
+    return;
+  }
+  const wonNums = new Set((STATE.winners||[]).map(w=>w.number));
+  const pool = STATE.tickets.filter(t=>t.status==="paid" && !wonNums.has(t.number));
+  if(!pool.length){ alert("No hay más tickets pagados disponibles para sortear."); return; }
+  const rank = already;                       // próximo premio a sortear
+  const banner = $("#winnerBox");
+  drawing = true;
+  $("#drawBtn").disabled = true;
+  renderAdmin();                              // muestra ganadores ya decididos
+  // ranura temporal que gira para este premio
+  const slot = document.createElement("div");
+  slot.className = "winner-row";
+  slot.innerHTML = `<span class="winner-rank">${RANKS[rank]||("Premio "+(rank+1))}</span><div class="winner-num">····</div><p class="winner-prize">Gana: ${escapeHtml(prizes[rank].name||"—")}</p>`;
+  banner.appendChild(slot);
+  const numEl = slot.querySelector(".winner-num");
+  let ticks=0;
+  const spin = setInterval(()=>{
+    const r = pool[Math.floor(Math.random()*pool.length)];
+    numEl.textContent = pad(r.number);
+    if(++ticks>22){
+      clearInterval(spin);
+      const w = pool[Math.floor(Math.random()*pool.length)];
+      STATE.winners = STATE.winners||[];
+      STATE.winners.push({ rank, prizeName:prizes[rank].name, number:w.number, name:w.name, code:w.code });
+      STATE.winner = STATE.winners[0] || null; // compatibilidad
+      saveState();
+      drawing = false;
+      renderAdmin();                          // re-dibuja la lista completa
+      try{ confettiBurst(); }catch(e){}
+    }
+  },70);
+}
+function updateDrawButton(){
+  const btn = $("#drawBtn"); if(!btn) return;
+  if(drawing) return;                         // no tocar el botón mientras gira
+  const prizes = getPrizes();
+  const n = (STATE.winners||[]).length;
+  if(n >= prizes.length){
+    btn.textContent = "✓ Sorteo completo";
+    btn.disabled = true;
+  } else {
+    btn.disabled = false;
+    btn.textContent = prizes.length>1 ? ("🎰 Sortear " + (RANKS[n]||("premio "+(n+1)))) : "🎰 Realizar sorteo";
+  }
+}
+async function resetDraw(){
+  await loadState(); STATE.winners=[]; STATE.winner=null; await saveState(); renderAdmin();
+}
+async function resetContest(){
+  const key = prompt("Para iniciar un concurso nuevo, ingresa la clave de organizadores:");
+  if(key === null) return;                       // cancelado
+  if(!(await checkOrgPassword(key))){ alert("Clave incorrecta. No se realizó ningún cambio."); return; }
+  if(!confirm("¿Eliminar TODAS las compras de tickets y comenzar un concurso nuevo?\n\nEsta acción no se puede deshacer. La configuración (premios, precio y datos de pago) se conserva.")) return;
+  await loadState();
+  STATE.tickets = [];
+  STATE.nextNumber = 1;
+  STATE.winners = [];
+  STATE.winner = null;
+  if(useSB()){
+    await sb.from("tickets").delete().neq("number", -1);
+    await sbSaveConfig();
+    await syncRefresh();
+    alert("Listo. El concurso fue reiniciado: 0 tickets vendidos.\n\n(En la nube, la numeración continúa de forma correlativa para no repetir números ya impresos.)");
+    return;
+  }
+  await saveState();
+  renderAdmin();
+  renderPublic();
+  alert("Listo. El concurso fue reiniciado: 0 tickets vendidos.");
+}
+
+function exportCSV(){
+  const head = ["Numero","Codigo","Nombre: BORIS MATAMALA","Contacto","Alumno","Estado","Valor","Fecha"];
+  const rows = STATE.tickets.map(t=>[pad(t.number),t.code,t.name,t.contact,t.student||"",t.status,t.price,t.createdAt]);
+  const csv = [head,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv],{type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "tickets-sortesur.csv";
+  a.click();
+}
+
+/* simple confetti */
+function confettiBurst(){
+  const cols=["#F2A03D","#E8743B","#1F6E5C","#5EA6C9","#E86A6A","#FFD27A"];
+  for(let i=0;i<70;i++){
+    const d=document.createElement("div");
+    d.style.cssText=`position:fixed;z-index:200;width:9px;height:14px;top:-20px;left:${Math.random()*100}vw;
+      background:${cols[i%cols.length]};border-radius:2px;pointer-events:none;
+      transform:rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(d);
+    const fall=2000+Math.random()*1500, drift=(Math.random()-.5)*240;
+    d.animate([{transform:`translate(0,0) rotate(0)`,opacity:1},
+      {transform:`translate(${drift}px,110vh) rotate(${720+Math.random()*360}deg)`,opacity:.9}],
+      {duration:fall,easing:"cubic-bezier(.3,.7,.5,1)"});
+    setTimeout(()=>d.remove(),fall);
+  }
+}
+
+/* ============ MODALS / NAV ============ */
+function openAdmin(){
+  $("#publicSite").style.display="none";
+  $("#adminPanel").classList.add("show");
+  window.scrollTo(0,0);
+  renderAdmin();
+}
+function requestAdmin(){ $("#pwOverlay").classList.add("show"); $("#pwInput").focus(); }
+
+/* ============ CONFIG ============ */
+function fileToScaledDataUrl(file, maxW=900, quality=0.78){
+  return new Promise((resolve,reject)=>{
+    const fr=new FileReader();
+    fr.onload=()=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.width, h=img.height;
+        if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
+        const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+        cv.getContext("2d").drawImage(img,0,0,w,h);
+        try{ resolve(cv.toDataURL("image/jpeg",quality)); }catch(e){ reject(e); }
+      };
+      img.onerror=reject; img.src=fr.result;
+    };
+    fr.onerror=reject; fr.readAsDataURL(file);
+  });
+}
+function rankName(i){ return RANKS[i] || ((i+1)+"º premio"); }
+let prizeRowSeq = 0;
+function renumberPrizeRows(){
+  const rows = [...document.querySelectorAll("#cfgPrizeList .cfg-prize")];
+  rows.forEach((row,idx)=>{
+    const num = row.querySelector(".prize-num");
+    if(num) num.textContent = idx+1;
+    const inp = row.querySelector("input[type=text]");
+    if(inp) inp.placeholder = rankName(idx)+" — nombre";
+    const del = row.querySelector(".prize-row-del");
+    if(del) del.style.visibility = rows.length>1 ? "visible" : "hidden";
+  });
+}
+function addPrizeRow(name, img){
+  const i = ++prizeRowSeq;
+  const row = document.createElement("div");
+  row.className = "cfg-prize";
+  row.dataset.idx = i;
+  row.innerHTML =
+    `<span class="prize-num"></span>`+
+    `<input id="cfgPrize${i}" type="text" value="${escapeHtml(name||"")}" />`+
+    `<div class="cfg-photo">`+
+      `<input type="hidden" id="cfgImg${i}" />`+
+      `<label class="photo-btn" id="cfgPrev${i}"><input type="file" accept="image/*" id="cfgFile${i}" hidden /><span class="pb-txt">📷 Subir foto</span></label>`+
+      `<button type="button" class="photo-clear" id="cfgClear${i}" title="Quitar foto">✕</button>`+
+      `<button type="button" class="prize-row-del" title="Eliminar premio">🗑</button>`+
+    `</div>`;
+  $("#cfgPrizeList").appendChild(row);
+  $("#cfgFile"+i).addEventListener("change", e=>onPrizeFile(i, e.target));
+  $("#cfgClear"+i).onclick=()=>setPrizePhoto(i, "");
+  row.querySelector(".prize-row-del").onclick=()=>{ row.remove(); renumberPrizeRows(); };
+  setPrizePhoto(i, img||"");
+  renumberPrizeRows();
+  return i;
+}
+function renderPrizeRows(prizes){
+  $("#cfgPrizeList").innerHTML = "";
+  const list = (prizes && prizes.length) ? prizes : [{name:"",img:""}];
+  list.forEach(p=>addPrizeRow(p.name, p.img));
+}
+function setPrizePhoto(i, val){
+  $("#cfgImg"+i).value = val || "";
+  const btn=$("#cfgPrev"+i), clr=$("#cfgClear"+i), txt=btn.querySelector(".pb-txt");
+  if(val){ btn.classList.add("has-img"); btn.style.backgroundImage=`url("${val.replace(/"/g,'&quot;')}")`; txt.textContent="Cambiar foto"; clr.classList.add("show"); }
+  else { btn.classList.remove("has-img"); btn.style.backgroundImage="none"; txt.textContent="📷 Subir foto"; clr.classList.remove("show"); }
+}
+async function onPrizeFile(i, input){
+  const f=input.files && input.files[0]; if(!f) return;
+  const txt=$("#cfgPrev"+i).querySelector(".pb-txt"); const prev=txt.textContent;
+  txt.textContent="Procesando…";
+  try{ const url=await fileToScaledDataUrl(f); setPrizePhoto(i, url); }
+  catch(e){ txt.textContent=prev; alert("No se pudo procesar la imagen. Prueba con otra foto (JPG o PNG)."); }
+  input.value="";
+}
+function openCfg(){
+  const c=STATE.config;
+  renderPrizeRows(getPrizes());
+  $("#cfgPrice").value=c.price;
+  $("#cfgDate").value=c.date; $("#cfgBank").value=c.bank; $("#cfgMpLink").value=c.mpLink||""; $("#cfgFlowLink").value=c.flowLink||""; $("#cfgFlowApi").checked=!!c.flowApi; $("#cfgWhats").value=c.whatsapp||""; $("#cfgInstagram").value=c.instagram||""; $("#cfgTiktok").value=c.tiktok||""; $("#cfgPw").value=c.pw;
+  $("#cfgOverlay").classList.add("show");
+}
+async function saveCfg(){
+  await loadState();
+  const prizes=[];
+  [...document.querySelectorAll("#cfgPrizeList .cfg-prize")].forEach(row=>{
+    const i = row.dataset.idx;
+    const nm = $("#cfgPrize"+i).value.trim();
+    if(nm) prizes.push({name:nm, img:$("#cfgImg"+i).value.trim()});
+  });
+  if(prizes.length){
+    STATE.config.prizes=prizes;
+    STATE.config.prize=prizes[0].name;       // back-compat
+    STATE.config.prizeImg=prizes[0].img||"";
+  }
+  STATE.config.price=Math.max(0,parseInt($("#cfgPrice").value)||STATE.config.price);
+  STATE.config.date=$("#cfgDate").value.trim()||STATE.config.date;
+  STATE.config.bank=$("#cfgBank").value.trim();
+  STATE.config.mpLink=$("#cfgMpLink").value.trim();
+  STATE.config.flowLink=$("#cfgFlowLink").value.trim();
+  STATE.config.flowApi=$("#cfgFlowApi").checked;
+  STATE.config.whatsapp=$("#cfgWhats").value.replace(/[^0-9]/g,"");
+  STATE.config.instagram=$("#cfgInstagram").value.trim();
+  STATE.config.tiktok=$("#cfgTiktok").value.trim();
+  await saveState();
+  $("#cfgOverlay").classList.remove("show");
+  renderPublic(); renderAdmin();
+}
+
+/* ============ WIRING ============ */
+document.addEventListener("DOMContentLoaded", async ()=>{
+  try{
+    initSupabase();
+    await loadState();
+  }catch(e){
+    console.warn("Inicio en modo respaldo:", e && e.message);
+    if(!STATE){ STATE = structuredClone(DEFAULT_STATE); ensurePrizes(); }
+    if(useSB()){ sbDown=true; showSbDownNotice(); }
+  }
+  try{ renderPublic(); }catch(e){ console.warn("renderPublic:", e && e.message); }
+  try{ handleFlowReturn(); }catch(e){}
+  try{ subscribeRealtime(); }catch(e){}
+
+  $("#plus").onclick=()=>{ $("#fQty").value=(parseInt($("#fQty").value)||1)+1; updateTotal(); };
+  $("#minus").onclick=()=>{ $("#fQty").value=Math.max(1,(parseInt($("#fQty").value)||1)-1); updateTotal(); };
+  $("#fQty").oninput=updateTotal;
+  $("#fName").oninput=updateTotal;
+  $("#payBtn").onclick=payMP;
+  $("#flowBtn").onclick=payFlow;
+  $("#transferBtn").onclick=payTransfer;
+  $("#confirmBuyBtn").onclick=buyTickets;
+  $("#reopenPayBtn").onclick=openPayLink;
+  $("#cancelPayBtn").onclick=resetPayFlow;
+  $("#lookupBtn").onclick=lookup;
+  $("#lookupCode").addEventListener("keydown",e=>{ if(e.key==="Enter") lookup(); });
+
+  $("#closeTicket").onclick=()=>$("#ticketOverlay").classList.remove("show");
+  $("#newBuyBtn").onclick=()=>{ $("#ticketOverlay").classList.remove("show"); $("#fName").value="";$("#fContact").value="";$("#fStudent").value="";$("#fQty").value=1; resetPayFlow(); updateTotal(); location.hash="#comprar"; };
+  $("#printTicketBtn").onclick=()=>window.print();
+
+  $("#adminToggle").onclick=requestAdmin;
+  $("#footerAdmin").onclick=requestAdmin;
+  $("#closePw").onclick=()=>$("#pwOverlay").classList.remove("show");
+  $("#pwBtn").onclick=async ()=>{
+    const ok = await checkOrgPassword($("#pwInput").value);
+    if(ok){ $("#pwOverlay").classList.remove("show"); $("#pwError").style.display="none"; $("#pwInput").value=""; openAdmin(); }
+    else { $("#pwError").style.display="block"; }
+  };
+  $("#pwInput").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#pwBtn").click(); });
+
+  $("#searchAdmin").oninput=renderAdmin;
+  $("#drawBtn").onclick=drawWinner;
+  $("#resetDrawBtn").onclick=resetDraw;
+  $("#exportBtn").onclick=exportCSV;
+  $("#downloadAllBtn").onclick=(e)=>downloadAllAdmin(e.currentTarget);
+  $("#configBtn").onclick=openCfg;
+  $("#resetContestBtn").onclick=resetContest;
+  $("#closeCfg").onclick=()=>$("#cfgOverlay").classList.remove("show");
+  $("#saveCfg").onclick=saveCfg;
+  $("#addPrizeBtn").onclick=()=>addPrizeRow("","");
+
+  document.querySelectorAll(".overlay").forEach(o=>o.addEventListener("click",e=>{ if(e.target===o) o.classList.remove("show"); }));
+});
+</script>
