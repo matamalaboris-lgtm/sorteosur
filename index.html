@@ -533,8 +533,11 @@
           <h3>Tus datos</h3>
           <label for="fName">Nombre y apellido</label>
           <input id="fName" type="text" placeholder="Ej: María Pérez" />
-          <label for="fContact">Teléfono o correo</label>
-          <input id="fContact" type="text" placeholder="+56 9 1234 5678 / correo@mail.com" />
+          <label for="fContact">Teléfono <span style="font-weight:600;color:var(--ink-soft)">— opcional</span></label>
+          <input id="fContact" type="text" placeholder="+56 9 1234 5678" />
+          <label for="fEmail">Correo electrónico</label>
+          <input id="fEmail" type="email" placeholder="correo@mail.com" />
+          <p class="hint" style="margin-top:0">Necesario para procesar el pago y enviarte el comprobante.</p>
 
           <label>Cantidad de tickets</label>
           <div class="qty-row">
@@ -1110,11 +1113,13 @@ function updateTotal(){
 /* ============ BUY ============ */
 async function buyTickets(){
   const name = $("#fName").value.trim();
-  const contact = $("#fContact").value.trim();
+  const contactRaw = $("#fContact").value.trim();
+  const email = $("#fEmail").value.trim();
   const student = "";
   let qty = Math.max(1, Math.min(50, parseInt($("#fQty").value)||1));
   if(!name){ alert("Por favor ingresa tu nombre."); $("#fName").focus(); return; }
-  if(!contact){ alert("Por favor ingresa un teléfono o correo de contacto."); $("#fContact").focus(); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ alert("Por favor ingresa un correo electrónico válido para procesar el pago."); $("#fEmail").focus(); return; }
+  const contact = contactRaw || email;
 
   $("#confirmBuyBtn").disabled = true;
   await loadState(); // refrescar para evitar números duplicados
@@ -1169,9 +1174,9 @@ function bankParts(){
 }
 function validateBuyer(){
   const name = $("#fName").value.trim();
-  const contact = $("#fContact").value.trim();
+  const email = $("#fEmail").value.trim();
   if(!name){ alert("Por favor ingresa tu nombre."); $("#fName").focus(); return false; }
-  if(!contact){ alert("Por favor ingresa un teléfono o correo de contacto."); $("#fContact").focus(); return false; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ alert("Por favor ingresa un correo electrónico válido para procesar el pago."); $("#fEmail").focus(); return false; }
   return true;
 }
 let currentPayMethod = "mp";
@@ -1215,11 +1220,13 @@ function payFlow(){
 }
 async function startFlowApi(){
   const name = $("#fName").value.trim();
-  const contact = $("#fContact").value.trim();
+  const contactRaw = $("#fContact").value.trim();
+  const email = $("#fEmail").value.trim();
   const student = "";
   const qty = Math.max(1, Math.min(50, parseInt($("#fQty").value)||1));
   if(!name){ alert("Por favor ingresa tu nombre."); $("#fName").focus(); return; }
-  if(!contact){ alert("Por favor ingresa un teléfono o correo de contacto."); $("#fContact").focus(); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ alert("Por favor ingresa un correo electrónico válido para procesar el pago."); $("#fEmail").focus(); return; }
+  const contact = contactRaw || email;
   if(!useSB()){ alert("El pago con Flow requiere conexión con la base de datos."); return; }
   const btn = $("#flowBtn"); const old = btn ? btn.innerHTML : "";
   if(btn){ btn.disabled = true; btn.innerHTML = "Redirigiendo a Flow…"; }
@@ -1228,7 +1235,6 @@ async function startFlowApi(){
     const orderId = "SS-" + Date.now() + "-" + Math.random().toString(36).slice(2,7);
     const amount = qty * STATE.config.price;
     await sbInsertTickets({ name, contact, student, status:"pending", method:"flow", price:STATE.config.price, orderId }, qty);
-    const email = /@/.test(contact) ? contact : "";
     const res = await fetch(SUPABASE_URL + "/functions/v1/flow/crear", {
       method:"POST", headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({ orderId, amount, email, subject:"Sorteo SORTEOSUR · "+qty+" número(s)" })
@@ -1807,7 +1813,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   $("#lookupCode").addEventListener("keydown",e=>{ if(e.key==="Enter") lookup(); });
 
   $("#closeTicket").onclick=()=>$("#ticketOverlay").classList.remove("show");
-  $("#newBuyBtn").onclick=()=>{ $("#ticketOverlay").classList.remove("show"); $("#fName").value="";$("#fContact").value="";$("#fQty").value=1; resetPayFlow(); updateTotal(); location.hash="#comprar"; };
+  $("#newBuyBtn").onclick=()=>{ $("#ticketOverlay").classList.remove("show"); $("#fName").value="";$("#fContact").value="";$("#fEmail").value="";$("#fQty").value=1; resetPayFlow(); updateTotal(); location.hash="#comprar"; };
   $("#printTicketBtn").onclick=()=>window.print();
 
   const _adminToggle=$("#adminToggle"); if(_adminToggle) _adminToggle.onclick=requestAdmin;
