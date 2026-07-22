@@ -1235,7 +1235,7 @@ async function startFlowApi(){
     });
     const data = await res.json();
     if(data.redirect){ window.location.href = data.redirect; }
-    else { throw new Error(data.error || "No se pudo crear el pago"); }
+    else { throw new Error((data.error||"No se pudo crear el pago") + (data.detail?("\n\nDetalle de Flow: "+JSON.stringify(data.detail)):"")); }
   }catch(e){
     if(btn){ btn.disabled = false; btn.innerHTML = old; }
     alert("No se pudo iniciar el pago con Flow: " + (e && e.message ? e.message : e) + "\n\nVerifica que la Edge Function esté desplegada.");
