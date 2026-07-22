@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="image-slot.js"></script>
 
 <style>
   :root{
@@ -157,6 +158,15 @@
     background:linear-gradient(90deg,#fff,#C7D2FE);-webkit-background-clip:text;background-clip:text;color:transparent}
   .hero-stats .hs span{font-family:"Manrope";font-weight:800;font-size:.72rem;letter-spacing:.06em;
     text-transform:uppercase;color:rgba(255,255,255,.72)}
+  /* referential image floating on the right of the hero */
+  .hero-media{position:absolute;z-index:2;right:clamp(22px,3.4vw,52px);top:50%;transform:translateY(-50%);
+    width:clamp(230px,25vw,340px);height:clamp(300px,32vw,420px);
+    border-radius:22px;overflow:hidden;box-shadow:0 26px 60px -20px rgba(10,8,40,.7);
+    border:3px solid rgba(255,255,255,.5);rotate:2.5deg;background:rgba(255,255,255,.08)}
+  .hero-media .hm-badge{position:absolute;z-index:3;top:12px;left:12px;background:var(--grad-brand);color:#fff;
+    font-family:"Sora";font-weight:800;font-size:.72rem;letter-spacing:.04em;padding:6px 12px;border-radius:999px;
+    box-shadow:var(--shadow-sm);pointer-events:none}
+  @media(max-width:900px){.hero-media{display:none}}
 
   /* ===== PRIZE SECTION ===== */
   .prize-section{padding:50px 0 8px}
@@ -420,7 +430,6 @@
       <a href="#como">Cómo funciona</a>
       <a href="#comprar">Comprar número</a>
       <a href="#buscar">Mi número</a>
-      <a class="admin-link" id="adminToggle">🔒 Organizadores</a>
     </nav>
   </div>
 </div>
@@ -447,6 +456,10 @@
             <div class="hs"><b>QR</b><span>Ticket verificable</span></div>
             <div class="hs"><b>24/7</b><span>Compra cuando quieras</span></div>
           </div>
+        </div>
+        <div class="hero-media">
+          <span class="hm-badge">🎁 Premios</span>
+          <image-slot id="heroPrize" shape="rect" fit="cover" placeholder="Arrastra aquí una foto de los premios / sorteo"></image-slot>
         </div>
       </div>
     </div>
@@ -522,8 +535,6 @@
           <input id="fName" type="text" placeholder="Ej: María Pérez" />
           <label for="fContact">Teléfono o correo</label>
           <input id="fContact" type="text" placeholder="+56 9 1234 5678 / correo@mail.com" />
-          <label for="fStudent">A nombre de <span style="font-weight:600;color:var(--ink-soft)">— opcional</span></label>
-          <input id="fStudent" type="text" placeholder="Referencia o dedicatoria (opcional)" />
 
           <label>Cantidad de tickets</label>
           <div class="qty-row">
@@ -557,9 +568,6 @@
             <button class="btn btn-pine" id="transferBtn" style="width:100%;justify-content:center;margin-top:10px">
               🏦 Pagar por transferencia
             </button>
-            <p class="hint" id="noPayHint" style="display:none;text-align:center;color:var(--coral);margin-top:10px">
-              El organizador aún no ha configurado el pago con Flow.
-            </p>
           </div>
 
           <!-- STEP 2: confirm after paying -->
@@ -583,8 +591,8 @@
               <span class="t-tag">VISTA PREVIA</span>
             </div>
             <div class="t-number">
-              <span>Tu número será</span>
-              <b id="pvNumber">0000</b>
+              <span>Tu número se revela al pagar</span>
+              <b id="pvNumber">????</b>
             </div>
             <div class="t-date"><b>📅 Sorteo: <span id="pvDate">—</span></b></div>
             <div class="t-foot">
@@ -778,7 +786,7 @@ async function checkOrgPassword(pw){
   if(!pw) return false;
   try{
     const res = await fetch(SUPABASE_URL + "/functions/v1/flow/login", {
-      method:"POST", headers:{ "Content-Type":"application/json" },
+      method:"POST", headers:{ "Content-Type":"application/json", "Authorization":"Bearer "+SUPABASE_ANON_KEY, "apikey":SUPABASE_ANON_KEY },
       body: JSON.stringify({ password: pw })
     });
     const data = await res.json();
@@ -1048,7 +1056,7 @@ function renderPublic(){
   startPrizeCycle();
   const sold = STATE.tickets.length;
   const paid = STATE.tickets.filter(t=>t.status==="paid").length;
-  $("#pvNumber").textContent = pad(STATE.nextNumber);
+  $("#pvNumber").textContent = "????";
   $("#pvDate").textContent = c.date || "Por definir";
   // WhatsApp de contacto
   const wnum = (c.whatsapp||"").replace(/[^0-9]/g,"");
@@ -1082,7 +1090,7 @@ function renderPublic(){
     ? `<div class="pay-mp-note"><span class="mp-dot"></span>Paga de forma segura con Flow. Tu ticket se genera al confirmar el pago.</div>`
     : "";
   // gate the method buttons by what's configured (solo Flow)
-  const payBtn = $("#payBtn"), flowBtn = $("#flowBtn"), tBtn = $("#transferBtn"), noHint = $("#noPayHint");
+  const payBtn = $("#payBtn"), flowBtn = $("#flowBtn"), tBtn = $("#transferBtn"), noHint = null;
   if(payBtn) payBtn.style.display = "none";
   if(flowBtn) flowBtn.style.display = hasFlow ? "" : "none";
   if(tBtn) tBtn.style.display = "none";
@@ -1103,7 +1111,7 @@ function updateTotal(){
 async function buyTickets(){
   const name = $("#fName").value.trim();
   const contact = $("#fContact").value.trim();
-  const student = $("#fStudent").value.trim();
+  const student = "";
   let qty = Math.max(1, Math.min(50, parseInt($("#fQty").value)||1));
   if(!name){ alert("Por favor ingresa tu nombre."); $("#fName").focus(); return; }
   if(!contact){ alert("Por favor ingresa un teléfono o correo de contacto."); $("#fContact").focus(); return; }
@@ -1208,7 +1216,7 @@ function payFlow(){
 async function startFlowApi(){
   const name = $("#fName").value.trim();
   const contact = $("#fContact").value.trim();
-  const student = $("#fStudent").value.trim();
+  const student = "";
   const qty = Math.max(1, Math.min(50, parseInt($("#fQty").value)||1));
   if(!name){ alert("Por favor ingresa tu nombre."); $("#fName").focus(); return; }
   if(!contact){ alert("Por favor ingresa un teléfono o correo de contacto."); $("#fContact").focus(); return; }
@@ -1649,6 +1657,21 @@ function openAdmin(){
   renderAdmin();
 }
 function requestAdmin(){ $("#pwOverlay").classList.add("show"); $("#pwInput").focus(); }
+function scrollToId(id){
+  const el=document.getElementById(id); if(!el) return;
+  const top=el.getBoundingClientRect().top + window.pageYOffset - 74;
+  window.scrollTo({ top:Math.max(0,top), behavior:"smooth" });
+}
+// Navega a una sección aunque el panel de organizadores esté abierto
+function navTo(hash){
+  const id=(hash||"").replace(/^#/,"");
+  if($("#adminPanel").classList.contains("show")){
+    $("#adminPanel").classList.remove("show");
+    $("#publicSite").style.display="";
+  }
+  document.querySelectorAll(".overlay.show").forEach(o=>o.classList.remove("show"));
+  if(id){ requestAnimationFrame(()=>scrollToId(id)); } else { window.scrollTo({top:0,behavior:"smooth"}); }
+}
 
 /* ============ CONFIG ============ */
 function fileToScaledDataUrl(file, maxW=900, quality=0.78){
@@ -1726,7 +1749,7 @@ function openCfg(){
   const c=STATE.config;
   renderPrizeRows(getPrizes());
   $("#cfgPrice").value=c.price;
-  $("#cfgDate").value=c.date; $("#cfgBank").value=c.bank; $("#cfgMpLink").value=c.mpLink||""; $("#cfgFlowLink").value=c.flowLink||""; $("#cfgFlowApi").checked=!!c.flowApi; $("#cfgWhats").value=c.whatsapp||""; $("#cfgInstagram").value=c.instagram||""; $("#cfgTiktok").value=c.tiktok||""; $("#cfgPw").value=c.pw;
+  $("#cfgDate").value=c.date; $("#cfgBank").value=c.bank; $("#cfgMpLink").value=c.mpLink||""; $("#cfgFlowLink").value=c.flowLink||""; $("#cfgFlowApi").checked=!!c.flowApi; $("#cfgWhats").value=c.whatsapp||""; $("#cfgInstagram").value=c.instagram||""; $("#cfgTiktok").value=c.tiktok||"";
   $("#cfgOverlay").classList.add("show");
 }
 async function saveCfg(){
@@ -1784,10 +1807,10 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   $("#lookupCode").addEventListener("keydown",e=>{ if(e.key==="Enter") lookup(); });
 
   $("#closeTicket").onclick=()=>$("#ticketOverlay").classList.remove("show");
-  $("#newBuyBtn").onclick=()=>{ $("#ticketOverlay").classList.remove("show"); $("#fName").value="";$("#fContact").value="";$("#fStudent").value="";$("#fQty").value=1; resetPayFlow(); updateTotal(); location.hash="#comprar"; };
+  $("#newBuyBtn").onclick=()=>{ $("#ticketOverlay").classList.remove("show"); $("#fName").value="";$("#fContact").value="";$("#fQty").value=1; resetPayFlow(); updateTotal(); location.hash="#comprar"; };
   $("#printTicketBtn").onclick=()=>window.print();
 
-  $("#adminToggle").onclick=requestAdmin;
+  const _adminToggle=$("#adminToggle"); if(_adminToggle) _adminToggle.onclick=requestAdmin;
   $("#footerAdmin").onclick=requestAdmin;
   $("#closePw").onclick=()=>$("#pwOverlay").classList.remove("show");
   $("#pwBtn").onclick=async ()=>{
@@ -1809,5 +1832,11 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   $("#addPrizeBtn").onclick=()=>addPrizeRow("","");
 
   document.querySelectorAll(".overlay").forEach(o=>o.addEventListener("click",e=>{ if(e.target===o) o.classList.remove("show"); }));
+
+  // Enlaces internos (menú, wordmark, botones del hero) funcionan siempre,
+  // incluso desde el panel de organizadores, con scroll suave y offset.
+  document.querySelectorAll('a[href^="#"]:not([href="#"])').forEach(a=>{
+    a.addEventListener("click",e=>{ e.preventDefault(); navTo(a.getAttribute("href")); });
+  });
 });
 </script>
