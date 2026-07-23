@@ -12,31 +12,31 @@
 
 <style>
   :root{
-    --cream:#F4F5FB;
-    --cream-2:#E9EAF6;
-    --ink:#15162B;
-    --ink-soft:#5A5E78;
-    --sun:#F59E0B;
-    --sun-deep:#D97706;
-    --pine:#4F46E5;
-    --pine-deep:#3730A3;
-    --sky:#6366F1;
-    --coral:#EF4444;
-    --gold:#FBBF24;
+    --cream:#EEF3EC;
+    --cream-2:#DCE6D9;
+    --ink:#12201A;
+    --ink-soft:#4B5A52;
+    --sun:#DE8A2C;
+    --sun-deep:#B96D18;
+    --pine:#1F6F4C;
+    --pine-deep:#134E37;
+    --sky:#0E7C8B;
+    --coral:#C6304A;
+    --gold:#E0A72B;
     --paper:#FFFFFF;
-    --line:#E4E4F2;
-    --line-soft:#EDEDF7;
-    --shadow:0 20px 44px -26px rgba(30,27,75,.34);
-    --shadow-md:0 14px 30px -20px rgba(30,27,75,.28);
-    --shadow-sm:0 6px 16px -12px rgba(30,27,75,.26);
+    --line:#D7E3D4;
+    --line-soft:#E5EEE3;
+    --shadow:0 20px 44px -26px rgba(18,42,29,.36);
+    --shadow-md:0 14px 30px -20px rgba(18,42,29,.30);
+    --shadow-sm:0 6px 16px -12px rgba(18,42,29,.28);
     --r:16px;
     --r-lg:20px;
-    --yellow:#FACC15;
-    --blue:#4F46E5;
-    --green:#10B981;
-    --sky-light:#C7D2FE;
+    --yellow:#E0A72B;
+    --blue:#1F6F4C;
+    --green:#2E9E6B;
+    --sky-light:#BFE0DD;
     --wa:#25D366;
-    --grad-brand:linear-gradient(115deg,#4F46E5 0%,#6D28D9 42%,#0EA5E9 100%);
+    --grad-brand:linear-gradient(115deg,#1F6F4C 0%,#0E7C8B 50%,#0C5E52 100%);
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -51,12 +51,16 @@
   }
   /* soft, intentional ambient glow — replaces muddy double-gradient */
   body::before{
-    content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
     background:
-      radial-gradient(820px 460px at 92% -12%, rgba(79,70,229,.13), transparent 60%),
-      radial-gradient(680px 480px at -8% 2%, rgba(14,165,233,.10), transparent 58%),
-      radial-gradient(560px 420px at 50% 108%, rgba(109,40,217,.08), transparent 60%);
+      radial-gradient(900px 520px at 88% -14%, rgba(14,124,139,.12), transparent 60%),
+      radial-gradient(720px 520px at -8% 4%, rgba(31,111,76,.10), transparent 58%);
   }
+  /* Silueta cordillera + bosque nativo del sur */
+  .scenery{position:fixed;left:0;right:0;bottom:0;z-index:-1;width:100%;height:min(72vh,720px);
+    pointer-events:none;opacity:.72}
+  .scenery svg{width:100%;height:100%;display:block}
+  .hero-range{position:absolute;left:0;right:0;bottom:0;width:100%;height:46%;z-index:-1;pointer-events:none}
   h1,h2,h3,.display{font-family:"Sora",sans-serif;font-weight:700;letter-spacing:-.02em;line-height:1.05}
   .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
   a{color:inherit}
@@ -96,13 +100,13 @@
   .brand small{font-family:"Manrope";font-weight:800;color:var(--pine);font-size:.7rem;letter-spacing:.09em;text-transform:uppercase}
   .nav-links{display:flex;gap:4px;align-items:center}
   .nav-links a{color:var(--ink-soft);text-decoration:none;font-weight:800;padding:9px 14px;border-radius:11px;font-size:.94rem;transition:.15s}
-  .nav-links a:hover{color:var(--pine-deep);background:rgba(79,70,229,.09)}
+  .nav-links a:hover{color:var(--pine-deep);background:rgba(31,111,76,.09)}
   .nav-links a.admin-link{color:var(--ink-soft);font-weight:700}
 
   /* ===== WORDMARK ===== */
   .wordmark{display:inline-flex;align-items:center;gap:11px;text-decoration:none;font-family:"Sora",sans-serif}
   .wordmark .wm-mark{flex:none;width:40px;height:40px;border-radius:12px;background:var(--grad-brand);
-    display:grid;place-items:center;box-shadow:0 10px 22px -10px rgba(79,70,229,.75);position:relative;overflow:hidden}
+    display:grid;place-items:center;box-shadow:0 10px 22px -10px rgba(31,111,76,.75);position:relative;overflow:hidden}
   .wordmark .wm-mark::after{content:"";position:absolute;inset:0;background:
     repeating-linear-gradient(120deg,rgba(255,255,255,.14) 0 2px,transparent 2px 9px);mix-blend-mode:overlay}
   .wordmark .wm-mark b{color:#fff;font-weight:800;font-size:1.28rem;line-height:1;transform:translateY(-1px)}
@@ -116,14 +120,14 @@
   .hero{position:relative;padding:34px 0 14px}
   .hero-stage{position:relative;border-radius:28px;overflow:hidden;box-shadow:var(--shadow);
     min-height:clamp(400px,48vw,540px);display:flex;align-items:center;isolation:isolate;
-    background:#1e1b4b}
+    background:#0B241A}
   .hero-art{position:absolute;inset:-40% -10%;z-index:-3;
     background:
-      radial-gradient(40% 55% at 18% 22%, rgba(99,102,241,.95), transparent 60%),
-      radial-gradient(45% 55% at 82% 18%, rgba(14,165,233,.9), transparent 62%),
-      radial-gradient(50% 60% at 70% 88%, rgba(139,92,246,.95), transparent 62%),
-      radial-gradient(40% 50% at 25% 92%, rgba(236,72,153,.55), transparent 60%),
-      linear-gradient(120deg,#312e81,#1e1b4b);
+      radial-gradient(40% 55% at 18% 22%, rgba(46,158,107,.95), transparent 60%),
+      radial-gradient(45% 55% at 82% 18%, rgba(14,124,139,.9), transparent 62%),
+      radial-gradient(50% 60% at 70% 88%, rgba(14,124,139,.95), transparent 62%),
+      radial-gradient(40% 50% at 25% 92%, rgba(198,48,74,.55), transparent 60%),
+      linear-gradient(120deg,#123B29,#0B241A);
     filter:saturate(1.15);animation:heroDrift 20s ease-in-out infinite alternate}
   @keyframes heroDrift{0%{transform:translate3d(0,0,0) scale(1.02)}100%{transform:translate3d(-3%,2%,0) scale(1.08)}}
   .hero-stage::before{content:"";position:absolute;inset:0;z-index:-2;pointer-events:none;
@@ -145,8 +149,8 @@
   .hero-cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
   .hero-cta .mini-note{font-weight:800;font-size:.86rem;color:var(--ink-soft)}
   .btn-brand{background:var(--grad-brand);color:#fff;background-size:160% 160%;
-    box-shadow:0 14px 30px -12px rgba(79,70,229,.85);animation:brandShift 6s ease infinite}
-  .btn-brand:hover{transform:translateY(-1px);box-shadow:0 18px 34px -12px rgba(79,70,229,.9)}
+    box-shadow:0 14px 30px -12px rgba(31,111,76,.85);animation:brandShift 6s ease infinite}
+  .btn-brand:hover{transform:translateY(-1px);box-shadow:0 18px 34px -12px rgba(31,111,76,.9)}
   @keyframes brandShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
   .btn-glass{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(6px)}
   .btn-glass:hover{background:rgba(255,255,255,.22);transform:translateY(-1px)}
@@ -301,7 +305,7 @@
     border-radius:22px;padding:0;box-shadow:var(--shadow)}
   .ticket .t-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
     padding:18px 22px 16px;border:none;border-radius:21px 21px 0 0;
-    background:linear-gradient(110deg,#1F8A6B 0%,#2A6FB0 48%,#E8923A 100%)}
+    background:linear-gradient(110deg,#1F6F4C 0%,#0E7C8B 52%,#C6304A 100%)}
   .ticket .t-org{font-family:"Sora";font-weight:700;color:#fff;font-size:1.06rem;line-height:1.15}
   .ticket .t-org small{display:block;color:rgba(255,255,255,.85);font-family:"Manrope";font-weight:800;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
   .ticket .t-tag{flex:none;white-space:nowrap;background:#fff;color:var(--pine-deep);font-family:"Sora";font-weight:700;padding:5px 13px;border-radius:999px;font-size:.72rem;letter-spacing:.02em;box-shadow:0 4px 10px -4px rgba(0,0,0,.35)}
@@ -436,6 +440,34 @@
 </style>
 
 <!-- ===================== TOP BAR ===================== -->
+<div class="scenery" aria-hidden="true">
+  <svg viewBox="0 0 1440 760" preserveAspectRatio="xMidYMax slice">
+    <defs>
+      <linearGradient id="mtnFar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BCD6C7"/><stop offset="1" stop-color="#A6C9B7"/></linearGradient>
+      <linearGradient id="mtnMid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7FB29A"/><stop offset="1" stop-color="#5D9A80"/></linearGradient>
+      <linearGradient id="mtnNear" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3F7E60"/><stop offset="1" stop-color="#2C6249"/></linearGradient>
+    </defs>
+    <!-- cordillera lejana con nieve -->
+    <path fill="url(#mtnFar)" d="M0 300 L150 210 L250 268 L360 150 L470 258 L560 196 L690 300 L820 180 L980 296 L1100 214 L1230 300 L1330 236 L1440 292 L1440 760 L0 760 Z"/>
+    <path fill="#EEF3EC" opacity=".9" d="M360 150 L332 190 L352 196 L342 214 L392 214 L378 190 L470 258 L470 196 L360 150 Z"/>
+    <path fill="#EEF3EC" opacity=".9" d="M820 180 L792 224 L816 230 L804 250 L862 248 L846 220 L820 180 Z"/>
+    <!-- bruma 1 -->
+    <rect x="0" y="300" width="1440" height="70" fill="#EEF3EC" opacity=".55"/>
+    <!-- cordillera media -->
+    <path fill="url(#mtnMid)" d="M0 420 L180 330 L340 410 L520 320 L700 420 L900 340 L1080 424 L1260 356 L1440 430 L1440 760 L0 760 Z"/>
+    <path fill="#EEF3EC" opacity=".85" d="M520 320 L498 356 L520 360 L556 356 L520 320 Z"/>
+    <!-- bruma 2 -->
+    <rect x="0" y="430" width="1440" height="58" fill="#EEF3EC" opacity=".5"/>
+    <!-- lomas cercanas -->
+    <path fill="url(#mtnNear)" d="M0 540 L220 470 L470 545 L720 468 L980 548 L1230 484 L1440 552 L1440 760 L0 760 Z"/>
+    <!-- treeline de coníferas nativas -->
+    <g id="forest" fill="#184F36"></g>
+  </svg>
+</div>
+<script>document.addEventListener("DOMContentLoaded",function(){function trees(id,W,baseY,minH,step,jit){var g=document.getElementById(id);if(!g)return;var s="";for(var x=-20;x<W+20;x+=step){var h=minH+Math.round(Math.abs(Math.sin(x*0.7))*minH*0.85),w=step*0.5+((x%3)*2),y=baseY+((x*7)%jit);s+='<path d="M'+x+' '+y+' L'+(x+w)+' '+(y-h*0.42)+' L'+(x+w*0.5)+' '+(y-h*0.42)+' L'+(x+w)+' '+(y-h*0.72)+' L'+(x+w*0.62)+' '+(y-h*0.72)+' L'+(x+w)+' '+(y-h)+' L'+(x+w*1.38)+' '+(y-h*0.72)+' L'+(x+w)+' '+(y-h*0.72)+' L'+(x+w*1.5)+' '+(y-h*0.42)+' L'+(x+w)+' '+(y-h*0.42)+' L'+(x+2*w)+' '+y+' Z"/>';}g.innerHTML=s;}
+trees("forest",1440,600,54,26,22);
+trees("heroForest",1440,300,30,20,14);});</script>
+
 <div class="topbar" id="top">
   <div class="wrap">
     <a class="brand wordmark" href="#top">
@@ -459,6 +491,13 @@
       <div class="hero-stage">
         <div class="hero-art" id="heroArt"></div>
         <div class="hero-scrim"></div>
+        <svg class="hero-range" viewBox="0 0 1440 340" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+          <path fill="#0E7C8B" opacity=".55" d="M0 190 L170 120 L300 178 L430 96 L560 176 L700 120 L860 196 L1010 118 L1160 190 L1290 130 L1440 188 L1440 340 L0 340 Z"/>
+          <path fill="#ffffff" opacity=".22" d="M430 96 L404 138 L426 142 L560 176 L560 130 L430 96 Z"/>
+          <path fill="#ffffff" opacity=".22" d="M1010 118 L986 158 L1008 162 L1160 190 L1160 150 L1010 118 Z"/>
+          <path fill="#0B241A" opacity=".9" d="M0 250 L200 192 L420 254 L640 190 L880 258 L1120 196 L1440 256 L1440 340 L0 340 Z"/>
+          <g id="heroForest" fill="#08170F"></g>
+        </svg>
         <div class="hero-content">
           <span class="eyebrow"><span class="dot"></span> Sorteos online transparentes</span>
           <h1>Tu número, tu <span class="hl">oportunidad</span> de ganar</h1>
@@ -734,6 +773,13 @@
     <p class="hint" style="margin-top:0">Independiente de los premios. Sube una o varias fotos; se muestran rotando en el recuadro grande del encabezado.</p>
     <div id="cfgGallery" class="cfg-gallery"></div>
     <label class="btn btn-ghost gallery-add" id="addGalleryBtn" style="width:100%;justify-content:center;margin:2px 0 6px;padding:11px;cursor:pointer"><input type="file" accept="image/*" id="galleryFile" multiple hidden />🖼 Agregar fotos a la galería</label>
+    <label>Bases del concurso (PDF)</label>
+    <p class="hint" style="margin-top:0">Sube el PDF con las bases legales. Aparecerá como enlace en el pie de página.</p>
+    <div id="cfgBasesRow" style="display:flex;align-items:center;gap:10px;margin:2px 0 6px">
+      <label class="btn btn-ghost" id="addBasesBtn" style="flex:1;justify-content:center;padding:11px;cursor:pointer"><input type="file" accept="application/pdf" id="basesFile" hidden />📄 Subir PDF de bases</label>
+      <button type="button" class="btn btn-ghost" id="delBasesBtn" style="display:none;padding:11px 14px">Quitar</button>
+    </div>
+    <p class="hint" id="basesStatus" style="margin-top:0"></p>
     <label>Valor por ticket (CLP)</label>
     <input id="cfgPrice" type="number" min="0" />
     <label>Fecha del sorteo</label>
@@ -772,7 +818,7 @@
     <div style="text-align:right;font-size:.9rem">
       <p style="margin:0 0 6px">SORTEOSUR · Sorteos online</p>
       <p style="margin:0 0 6px;color:rgba(255,255,255,.6);font-weight:700;font-size:.82rem">Bams Spa · RUT 76.919.084-8</p>
-      <a id="footerWhats" href="#" target="_blank" rel="noopener" style="display:none;margin-right:14px">💬 Escríbenos por WhatsApp</a>
+      <a id="footerBases" href="#" target="_blank" rel="noopener" style="display:none;margin-right:14px">📄 Bases del concurso</a>
       <a id="footerInsta" href="#" target="_blank" rel="noopener" style="display:none;margin-right:14px">📷 Instagram</a>
       <a id="footerTiktok" href="#" target="_blank" rel="noopener" style="display:none;margin-right:14px">♪ TikTok</a>
       <a id="footerAdmin">Acceso organizadores</a>
@@ -1111,14 +1157,12 @@ function renderPublic(){
   $("#pvDate").textContent = c.date || "Por definir";
   // WhatsApp de contacto
   const wnum = (c.whatsapp||"").replace(/[^0-9]/g,"");
-  const fab=$("#waFab"), fwa=$("#footerWhats");
+  const fab=$("#waFab");
   if(wnum){
     const url="https://wa.me/"+wnum+"?text="+encodeURIComponent("¡Hola! Tengo una consulta sobre el sorteo de SORTEOSUR 🎟️");
     if(fab){ fab.href=url; fab.classList.add("show"); }
-    if(fwa){ fwa.href=url; fwa.style.display="inline"; }
   } else {
     if(fab) fab.classList.remove("show");
-    if(fwa) fwa.style.display="none";
   }
   // Redes sociales
   const socialUrl=(v,base)=>{ v=(v||"").trim(); if(!v) return ""; if(/^https?:\/\//i.test(v)) return v; return base+v.replace(/^@/,""); };
@@ -1126,6 +1170,8 @@ function renderPublic(){
   const fi=$("#footerInsta"), ft=$("#footerTiktok");
   if(fi){ if(iUrl){ fi.href=iUrl; fi.style.display="inline"; } else fi.style.display="none"; }
   if(ft){ if(tUrl){ ft.href=tUrl; ft.style.display="inline"; } else ft.style.display="none"; }
+  const fb=$("#footerBases");
+  if(fb){ if(c.bases){ fb.href=c.bases; fb.style.display="inline"; } else fb.style.display="none"; }
   // pay info
   const parts = (c.bank||"").split("|").map(x=>x.trim()).filter(Boolean);
   $("#payInfo").innerHTML = parts.length
@@ -1748,6 +1794,25 @@ function fileToScaledDataUrl(file, maxW=900, quality=0.78){
 function rankName(i){ return RANKS[i] || ((i+1)+"º premio"); }
 let prizeRowSeq = 0;
 let cfgGallery = [];
+let cfgBases = "";
+function renderBasesStatus(){
+  const st=$("#basesStatus"), del=$("#delBasesBtn");
+  if(cfgBases){ st.textContent="✓ PDF cargado."; st.style.color="var(--pine)"; del.style.display=""; }
+  else { st.textContent=""; del.style.display="none"; }
+}
+function fileToDataUrl(file){
+  return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
+}
+async function onBasesFile(input){
+  const f=(input.files||[])[0]; if(!f) return;
+  if(f.type!=="application/pdf"){ alert("El archivo debe ser un PDF."); input.value=""; return; }
+  if(f.size > 4*1024*1024){ alert("El PDF es muy grande (máx 4 MB). Comprímelo e intenta de nuevo."); input.value=""; return; }
+  const btn=$("#addBasesBtn"); btn.style.pointerEvents="none";
+  try{ cfgBases=await fileToDataUrl(f); }catch(e){ alert("No se pudo leer el PDF."); }
+  btn.innerHTML='<input type="file" accept="application/pdf" id="basesFile" hidden />📄 Reemplazar PDF de bases';
+  $("#basesFile").addEventListener("change", e=>onBasesFile(e.target));
+  btn.style.pointerEvents=""; input.value=""; renderBasesStatus();
+}
 function renderCfgGallery(){
   const wrap=$("#cfgGallery");
   wrap.innerHTML = cfgGallery.map((src,i)=>`<div class="g-item" style="background-image:url('${src.replace(/'/g,"&#39;")}')"><button type="button" class="g-del" data-i="${i}" title="Quitar">✕</button></div>`).join("");
@@ -1821,6 +1886,8 @@ function openCfg(){
   renderPrizeRows(getPrizes());
   cfgGallery = (c.gallery||[]).filter(Boolean).slice();
   renderCfgGallery();
+  cfgBases = c.bases||"";
+  renderBasesStatus();
   $("#cfgPrice").value=c.price;
   $("#cfgDate").value=c.date; $("#cfgBank").value=c.bank; $("#cfgMpLink").value=c.mpLink||""; $("#cfgFlowLink").value=c.flowLink||""; $("#cfgFlowApi").checked=!!c.flowApi; $("#cfgWhats").value=c.whatsapp||""; $("#cfgInstagram").value=c.instagram||""; $("#cfgTiktok").value=c.tiktok||"";
   $("#cfgOverlay").classList.add("show");
@@ -1839,6 +1906,7 @@ async function saveCfg(){
     STATE.config.prizeImg=prizes[0].img||"";
   }
   STATE.config.gallery=cfgGallery.slice();
+  STATE.config.bases=cfgBases;
   STATE.config.price=Math.max(0,parseInt($("#cfgPrice").value)||STATE.config.price);
   STATE.config.date=$("#cfgDate").value.trim()||STATE.config.date;
   STATE.config.bank=$("#cfgBank").value.trim();
@@ -1905,6 +1973,8 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   $("#saveCfg").onclick=saveCfg;
   $("#addPrizeBtn").onclick=()=>addPrizeRow("","");
   $("#galleryFile").addEventListener("change", e=>onGalleryFiles(e.target));
+  $("#basesFile").addEventListener("change", e=>onBasesFile(e.target));
+  $("#delBasesBtn").onclick=()=>{ cfgBases=""; $("#addBasesBtn").innerHTML='<input type="file" accept="application/pdf" id="basesFile" hidden />📄 Subir PDF de bases'; $("#basesFile").addEventListener("change", e=>onBasesFile(e.target)); renderBasesStatus(); };
 
   document.querySelectorAll(".overlay").forEach(o=>o.addEventListener("click",e=>{ if(e.target===o) o.classList.remove("show"); }));
 
