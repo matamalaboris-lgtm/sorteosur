@@ -1171,7 +1171,22 @@ function renderPublic(){
   if(fi){ if(iUrl){ fi.href=iUrl; fi.style.display="inline"; } else fi.style.display="none"; }
   if(ft){ if(tUrl){ ft.href=tUrl; ft.style.display="inline"; } else ft.style.display="none"; }
   const fb=$("#footerBases");
-  if(fb){ if(c.bases){ fb.href=c.bases; fb.style.display="inline"; } else fb.style.display="none"; }
+  if(fb){
+    if(c.bases){
+      fb.style.display="inline";
+      fb.onclick=(e)=>{
+        e.preventDefault();
+        try{
+          const parts=c.bases.split(",");
+          const bin=atob(parts[1]||"");
+          const arr=new Uint8Array(bin.length);
+          for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+          const blob=new Blob([arr],{type:"application/pdf"});
+          window.open(URL.createObjectURL(blob),"_blank","noopener");
+        }catch(err){ window.open(c.bases,"_blank","noopener"); }
+      };
+    } else { fb.style.display="none"; fb.onclick=null; }
+  }
   // pay info
   const parts = (c.bank||"").split("|").map(x=>x.trim()).filter(Boolean);
   $("#payInfo").innerHTML = parts.length
